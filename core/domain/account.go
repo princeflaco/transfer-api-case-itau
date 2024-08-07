@@ -7,20 +7,20 @@ import (
 )
 
 type Account struct {
-	Id      string
-	UserId  string
-	Balance int
-	mu      sync.Mutex
+	Id         string
+	CustomerId string
+	Balance    int
+	mu         sync.Mutex
 }
 
-func NewAccount(id string, userId string, balance int) *Account {
+func NewAccount(id string, customerId string, balance int) *Account {
 	if id == "" {
 		id = uuid.NewString()
 	}
 	return &Account{
-		Id:      id,
-		Balance: balance,
-		UserId:  userId,
+		Id:         id,
+		Balance:    balance,
+		CustomerId: customerId,
 	}
 }
 

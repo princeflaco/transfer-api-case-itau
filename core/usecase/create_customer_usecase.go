@@ -7,17 +7,17 @@ import (
 	"transfer-api/core/usecase/output"
 )
 
-type CreateUserUseCase struct {
-	UserRepo    repository.UserRepository
+type CreateCustomerUseCase struct {
+	UserRepo    repository.CustomerRepository
 	AccountRepo repository.AccountRepository
 }
 
-func (c *CreateUserUseCase) Execute(input input.CreateUserInput) (*output.CreateUserOutput, error) {
+func (c *CreateCustomerUseCase) Execute(input input.CreateCustomerInput) (*output.CreateCustomerOutput, error) {
 	if err := input.Validate(); err != nil {
 		return nil, err
 	}
 
-	user := domain.NewUser(input.Id, input.Name)
+	user := domain.NewCustomer(input.Id, input.Name)
 
 	savedUser, err := c.UserRepo.Save(*user)
 
@@ -33,7 +33,7 @@ func (c *CreateUserUseCase) Execute(input input.CreateUserInput) (*output.Create
 		return nil, err
 	}
 
-	newUser := output.NewCreateUserOutput(savedAccount.UserId, savedAccount.Id)
+	newUser := output.NewCreateCustomerOutput(savedAccount.CustomerId, savedAccount.Id)
 
 	return newUser, nil
 }

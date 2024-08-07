@@ -4,16 +4,16 @@ import (
 	"github.com/google/uuid"
 )
 
-type User struct {
+type Customer struct {
 	Id   string
 	Name string
 }
 
-func NewUser(id string, name string) *User {
+func NewCustomer(id string, name string) *Customer {
 	if id == "" {
 		id = uuid.NewString()
 	}
-	return &User{
+	return &Customer{
 		Id:   id,
 		Name: name,
 	}
