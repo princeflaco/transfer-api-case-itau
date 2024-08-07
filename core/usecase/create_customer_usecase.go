@@ -27,7 +27,7 @@ func (c *CreateCustomerUseCase) Execute(input input.CreateCustomerInput) (*outpu
 
 	account := domain.NewAccount(input.AccountId, savedUser.Id, input.Balance)
 
-	savedAccount, err := c.AccountRepo.Save(account)
+	savedAccount, err := c.AccountRepo.Save(*account)
 
 	if err != nil {
 		return nil, err

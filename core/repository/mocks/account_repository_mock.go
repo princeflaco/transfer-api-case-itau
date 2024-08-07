@@ -9,8 +9,8 @@ type AccountRepositoryMock struct {
 	mock.Mock
 }
 
-func (a *AccountRepositoryMock) Save(account *domain.Account) (*domain.Account, error) {
-	r := a.Called(&account)
+func (a *AccountRepositoryMock) Save(account domain.Account) (*domain.Account, error) {
+	r := a.Called(account)
 	return r.Get(0).(*domain.Account), r.Error(1)
 }
 

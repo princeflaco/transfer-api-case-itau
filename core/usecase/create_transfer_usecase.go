@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"math"
+	"sync"
 	"transfer-api/core/domain"
 	"transfer-api/core/repository"
 	"transfer-api/core/usecase/input"
@@ -11,6 +12,7 @@ import (
 type CreateTransferUseCase struct {
 	TransferRepo repository.TransferRepository
 	AccountRepo  repository.AccountRepository
+	sync.Mutex
 }
 
 func NewCreateTransferUseCase(transferRepo repository.TransferRepository, accountRepo repository.AccountRepository) *CreateTransferUseCase {
@@ -38,7 +40,9 @@ func (uc *CreateTransferUseCase) Execute(input input.TransferInput, accountId st
 	amount := FloatToCents(input.Amount)
 	transfer := domain.NewTransfer(accountTo.Id, accountFrom.Id, amount)
 
+	uc.Lock()
 	err = accountFrom.Withdraw(amount)
+	uc.Unlock()
 
 	if err = accountFrom.Withdraw(amount); err != nil {
 		transfer.Successful(false)
@@ -46,7 +50,10 @@ func (uc *CreateTransferUseCase) Execute(input input.TransferInput, accountId st
 		return nil, err
 	}
 
+	uc.Lock()
 	accountTo.Deposit(amount)
+	uc.Unlock()
+
 	transfer.Successful(true)
 
 	savedTransfer, err := uc.TransferRepo.SaveTransfer(*transfer)
@@ -54,13 +61,13 @@ func (uc *CreateTransferUseCase) Execute(input input.TransferInput, accountId st
 		return nil, err
 	}
 
-	_, err = uc.AccountRepo.Save(accountFrom)
+	_, err = uc.AccountRepo.Save(*accountFrom)
 
 	if err != nil {
 		return nil, err
 	}
 
-	_, err = uc.AccountRepo.Save(accountTo)
+	_, err = uc.AccountRepo.Save(*accountTo)
 	if err != nil {
 		return nil, err
 	}
