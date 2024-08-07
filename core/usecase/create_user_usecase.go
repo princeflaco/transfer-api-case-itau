@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"context"
 	"transfer-api/core/domain"
 	"transfer-api/core/errors"
 	"transfer-api/core/repository"
@@ -14,7 +13,7 @@ type CreateUserUseCase struct {
 	AccountRepo repository.AccountRepository
 }
 
-func (c *CreateUserUseCase) Execute(ctx context.Context, input input.CreateUserInput) (*output.CreateUserOutput, error) {
+func (c *CreateUserUseCase) Execute(input input.CreateUserInput) (*output.CreateUserOutput, error) {
 	if err := input.Validate(); err != nil {
 		return nil, err
 	}
@@ -36,15 +35,15 @@ func (c *CreateUserUseCase) Execute(ctx context.Context, input input.CreateUserI
 		return nil, err
 	}
 
-	exists, err = c.AccountRepo.Exists(input.AccountNumber)
+	exists, err = c.AccountRepo.Exists(input.AccountId)
 	if err != nil {
 		return nil, err
 	}
 	if exists {
-		return nil, errors.NewDuplicatedIdError(input.AccountNumber)
+		return nil, errors.NewDuplicatedIdError(input.AccountId)
 	}
 
-	account := domain.NewAccount(input.AccountNumber, savedUser.Id, input.Balance)
+	account := domain.NewAccount(input.AccountId, savedUser.Id, input.Balance)
 
 	savedAccount, err := c.AccountRepo.Save(*account)
 

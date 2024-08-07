@@ -4,7 +4,7 @@ import "encoding/json"
 
 type CreateUserOutput struct {
 	Id        string `json:"id"`
-	AccountId string `json:"numero_conta"`
+	AccountId string `json:"account_id"`
 }
 
 func NewCreateUserOutput(id string, accountId string) *CreateUserOutput {

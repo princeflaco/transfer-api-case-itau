@@ -6,10 +6,10 @@ import (
 )
 
 type CreateUserInput struct {
-	Id            string `json:"id"`
-	Name          string `json:"nome"`
-	AccountNumber string `json:"numero_conta"`
-	Balance       int    `json:"saldo"`
+	Id        string `json:"id"`
+	Name      string `json:"name"`
+	AccountId string `json:"account_id"`
+	Balance   int    `json:"balance"`
 }
 
 func (i CreateUserInput) Validate() error {
