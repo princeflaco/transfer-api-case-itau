@@ -54,6 +54,17 @@ func (uc *TransferUseCase) Execute(input input.TransferInput, accountId string) 
 		return nil, err
 	}
 
+	_, err = uc.AccountRepo.Save(accountFrom)
+
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = uc.AccountRepo.Save(accountTo)
+	if err != nil {
+		return nil, err
+	}
+
 	transferOutput := output.NewTransferOutput(savedTransfer.Id, savedTransfer.Success, savedTransfer.Date)
 
 	return transferOutput, nil
