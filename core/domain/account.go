@@ -2,7 +2,7 @@ package domain
 
 import (
 	"github.com/google/uuid"
-	"transfer-api/src/core/errors"
+	"transfer-api/core/errors"
 )
 
 type Account struct {

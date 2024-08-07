@@ -2,7 +2,7 @@ package input
 
 import (
 	"encoding/json"
-	"transfer-api/src/core/errors"
+	"transfer-api/core/errors"
 )
 
 type CreateUserInput struct {

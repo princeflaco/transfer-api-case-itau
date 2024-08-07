@@ -1,6 +1,6 @@
 package repository
 
-import "transfer-api/src/core/domain"
+import "transfer-api/core/domain"
 
 type TransactionRepository interface {
 	GetTransactions(accountId string) ([]domain.Transaction, error)

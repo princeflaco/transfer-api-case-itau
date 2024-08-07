@@ -1,6 +1,6 @@
 package repository
 
-import "transfer-api/src/core/domain"
+import "transfer-api/core/domain"
 
 type AccountRepository interface {
 	Save(domain.Account) (*domain.Account, error)

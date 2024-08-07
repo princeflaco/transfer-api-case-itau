@@ -1,6 +1,6 @@
 package repository
 
-import "transfer-api/src/core/domain"
+import "transfer-api/core/domain"
 
 type UserRepository interface {
 	GetById(id string) (domain.User, error)

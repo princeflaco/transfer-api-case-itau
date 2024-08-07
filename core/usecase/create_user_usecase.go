@@ -2,11 +2,11 @@ package usecase
 
 import (
 	"context"
-	"transfer-api/src/core/domain"
-	"transfer-api/src/core/errors"
-	"transfer-api/src/core/repository"
-	"transfer-api/src/core/usecase/input"
-	"transfer-api/src/core/usecase/output"
+	"transfer-api/core/domain"
+	"transfer-api/core/errors"
+	"transfer-api/core/repository"
+	"transfer-api/core/usecase/input"
+	"transfer-api/core/usecase/output"
 )
 
 type CreateUserUseCase struct {
