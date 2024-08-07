@@ -8,19 +8,19 @@ import (
 	"transfer-api/core/usecase/output"
 )
 
-type TransferUseCase struct {
+type CreateTransferUseCase struct {
 	TransferRepo repository.TransferRepository
 	AccountRepo  repository.AccountRepository
 }
 
-func NewTransferUseCase(transferRepo repository.TransferRepository, accountRepo repository.AccountRepository) *TransferUseCase {
-	return &TransferUseCase{
+func NewCreateTransferUseCase(transferRepo repository.TransferRepository, accountRepo repository.AccountRepository) *CreateTransferUseCase {
+	return &CreateTransferUseCase{
 		TransferRepo: transferRepo,
 		AccountRepo:  accountRepo,
 	}
 }
 
-func (uc *TransferUseCase) Execute(input input.TransferInput, accountId string) (*output.TransferOutput, error) {
+func (uc *CreateTransferUseCase) Execute(input input.TransferInput, accountId string) (*output.TransferOutput, error) {
 	if err := input.Validate(); err != nil {
 		return nil, err
 	}
@@ -35,7 +35,7 @@ func (uc *TransferUseCase) Execute(input input.TransferInput, accountId string) 
 		return nil, err
 	}
 
-	amount := floatToCents(input.Amount)
+	amount := FloatToCents(input.Amount)
 	transfer := domain.NewTransfer(accountTo.Id, accountFrom.Id, amount)
 
 	err = accountFrom.Withdraw(amount)
@@ -70,6 +70,6 @@ func (uc *TransferUseCase) Execute(input input.TransferInput, accountId string) 
 	return transferOutput, nil
 }
 
-func floatToCents(amount float64) int {
+func FloatToCents(amount float64) int {
 	return int(math.Round(amount * 100))
 }

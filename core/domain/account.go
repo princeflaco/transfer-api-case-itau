@@ -1,7 +1,6 @@
 package domain
 
 import (
-	"github.com/google/uuid"
 	"sync"
 	"transfer-api/core/errors"
 )
@@ -14,9 +13,6 @@ type Account struct {
 }
 
 func NewAccount(id string, customerId string, balance int) *Account {
-	if id == "" {
-		id = uuid.NewString()
-	}
 	return &Account{
 		Id:         id,
 		Balance:    balance,

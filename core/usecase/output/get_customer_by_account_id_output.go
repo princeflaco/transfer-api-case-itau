@@ -1,14 +1,14 @@
 package output
 
-type GetCustomerByAccountIdOutput struct {
+type GetCustomerOutput struct {
 	Id            string  `json:"id"`
 	Name          string  `json:"name"`
 	AccountNumber string  `json:"account_number"`
 	Balance       float64 `json:"balance"`
 }
 
-func NewGetCustomerByAccountIdOutput(id string, name string, accountNumber string, balance float64) *GetCustomerByAccountIdOutput {
-	return &GetCustomerByAccountIdOutput{
+func NewGetCustomerOutput(id string, name string, accountNumber string, balance float64) *GetCustomerOutput {
+	return &GetCustomerOutput{
 		Id:            id,
 		Name:          name,
 		AccountNumber: accountNumber,

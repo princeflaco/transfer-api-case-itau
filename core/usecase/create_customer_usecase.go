@@ -17,7 +17,7 @@ func (c *CreateCustomerUseCase) Execute(input input.CreateCustomerInput) (*outpu
 		return nil, err
 	}
 
-	user := domain.NewCustomer(input.Id, input.Name)
+	user := domain.NewCustomer(input.Id, input.Name, input.AccountId)
 
 	savedUser, err := c.UserRepo.Save(*user)
 

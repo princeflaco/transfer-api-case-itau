@@ -1,20 +1,15 @@
 package domain
 
-import (
-	"github.com/google/uuid"
-)
-
 type Customer struct {
-	Id   string
-	Name string
+	Id        string
+	Name      string
+	AccountId string
 }
 
-func NewCustomer(id string, name string) *Customer {
-	if id == "" {
-		id = uuid.NewString()
-	}
+func NewCustomer(id string, name string, accountId string) *Customer {
 	return &Customer{
-		Id:   id,
-		Name: name,
+		Id:        id,
+		Name:      name,
+		AccountId: accountId,
 	}
 }
