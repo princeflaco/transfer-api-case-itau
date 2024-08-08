@@ -8,8 +8,8 @@ import (
 )
 
 type CreateCustomerUseCase struct {
-	UserRepo    repository.CustomerRepository
-	AccountRepo repository.AccountRepository
+	CustomerRepo repository.CustomerRepository
+	AccountRepo  repository.AccountRepository
 }
 
 func (c *CreateCustomerUseCase) Execute(input input.CreateCustomerInput) (*output.CreateCustomerOutput, error) {
@@ -19,13 +19,15 @@ func (c *CreateCustomerUseCase) Execute(input input.CreateCustomerInput) (*outpu
 
 	user := domain.NewCustomer(input.Id, input.Name, input.AccountId)
 
-	savedUser, err := c.UserRepo.Save(*user)
+	savedUser, err := c.CustomerRepo.Save(*user)
 
 	if err != nil {
 		return nil, err
 	}
 
-	account := domain.NewAccount(input.AccountId, savedUser.Id, input.Balance)
+	balance := FloatToCents(input.Balance)
+
+	account := domain.NewAccount(input.AccountId, savedUser.Id, balance)
 
 	savedAccount, err := c.AccountRepo.Save(*account)
 
