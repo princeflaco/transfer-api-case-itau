@@ -6,6 +6,7 @@ import (
 )
 
 const TimeFormat = "2006-01-02 15:04:05"
+const TransferMaxAmount = 10000.0
 
 type Transfer struct {
 	Id              string
@@ -25,6 +26,8 @@ func NewTransfer(accountId string, targetAccountId string, amount int) *Transfer
 		Id:              uuid.NewString(),
 	}
 }
+
+func ()
 
 func (t *Transfer) Successful(successful bool) {
 	t.Success = successful

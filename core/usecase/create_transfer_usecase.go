@@ -3,6 +3,7 @@ package usecase
 import (
 	"sync"
 	"transfer-api/core/domain"
+	errors2 "transfer-api/core/errors"
 	"transfer-api/core/repository"
 	"transfer-api/core/usecase/input"
 	"transfer-api/core/usecase/output"
@@ -25,6 +26,10 @@ func NewCreateTransferUseCase(transferRepo repository.TransferRepository, accoun
 func (uc *CreateTransferUseCase) Execute(input input.TransferInput, accountId string) (*output.TransferOutput, error) {
 	if err := input.Validate(); err != nil {
 		return nil, err
+	}
+
+	if input.Amount > domain.TransferMaxAmount {
+		return nil, errors2.NewTransferMaxAmountError(input.Amount)
 	}
 
 	uc.Lock()
