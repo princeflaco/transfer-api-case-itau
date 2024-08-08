@@ -65,11 +65,15 @@ func TestCreateCustomerUseCase_ValidationError(t *testing.T) {
 		Balance:   1000.0,
 	}
 
-	invalidFieldErr := errors.NewInvalidFieldError("name", "Should not be empty")
+	invalidFieldNameErr := errors.NewInvalidFieldError("name", "Should not be empty")
+	invalidFieldIdErr := errors.NewInvalidFieldError("id", "Should not be empty")
+	invalidFieldAccountIdErr := errors.NewInvalidFieldError("account_id", "Should not be empty")
+	invalidFieldErr := []errors.InvalidFieldError{*invalidFieldNameErr, *invalidFieldIdErr, *invalidFieldAccountIdErr}
+	validationErr := errors.NewValidationError(invalidFieldErr...)
 
 	output, err := useCase.Execute(i)
 
-	assert.Error(t, err, invalidFieldErr)
+	assert.Error(t, err, validationErr)
 	assert.Nil(t, output)
 
 	mockCustomerRepo.AssertExpectations(t)

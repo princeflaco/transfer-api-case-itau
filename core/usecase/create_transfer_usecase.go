@@ -16,6 +16,8 @@ type CreateTransferUseCase struct {
 	sync.Mutex
 }
 
+const TransferMaxAmount = 10000.0
+
 func NewCreateTransferUseCase(transferRepo repository.TransferRepository, accountRepo repository.AccountRepository) *CreateTransferUseCase {
 	return &CreateTransferUseCase{
 		TransferRepo: transferRepo,
@@ -25,10 +27,10 @@ func NewCreateTransferUseCase(transferRepo repository.TransferRepository, accoun
 
 func (uc *CreateTransferUseCase) Execute(input input.TransferInput, accountId string) (*output.TransferOutput, error) {
 	if err := input.Validate(); err != nil {
-		return nil, err
+		return nil, errors2.NewValidationError(err...)
 	}
 
-	if input.Amount > domain.TransferMaxAmount {
+	if input.Amount > TransferMaxAmount {
 		return nil, errors2.NewTransferMaxAmountError(input.Amount)
 	}
 

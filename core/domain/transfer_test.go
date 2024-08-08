@@ -10,8 +10,8 @@ import (
 )
 
 func TestNewTransfer(t *testing.T) {
-	accountId := "account123"
-	targetAccountId := "targetAccount456"
+	accountId := uuid.NewString()
+	targetAccountId := uuid.NewString()
 	amount := 500
 
 	transfer := domain.NewTransfer(accountId, targetAccountId, amount)
@@ -29,8 +29,8 @@ func TestNewTransfer(t *testing.T) {
 }
 
 func TestTransfer_Successful(t *testing.T) {
-	accountId := "account123"
-	targetAccountId := "targetAccount456"
+	accountId := uuid.NewString()
+	targetAccountId := uuid.NewString()
 	amount := 500
 
 	transfer := domain.NewTransfer(accountId, targetAccountId, amount)

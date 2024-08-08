@@ -7,12 +7,13 @@ type TransferInput struct {
 	Amount          float64 `json:"amount"`
 }
 
-func (input *TransferInput) Validate() error {
+func (input *TransferInput) Validate() []errors.InvalidFieldError {
+	var fieldErrors []errors.InvalidFieldError
 	if input.TargetAccountId == "" {
-		return errors.NewInvalidFieldError("numero_conta_destino", "Should not be empty or nil")
+		fieldErrors = append(fieldErrors, *errors.NewInvalidFieldError("numero_conta_destino", "Should not be empty or nil"))
 	}
 	if input.Amount <= 0 {
-		return errors.NewInvalidFieldError("valor", "Should be positive")
+		fieldErrors = append(fieldErrors, *errors.NewInvalidFieldError("valor", "Should be positive"))
 	}
-	return nil
+	return fieldErrors
 }

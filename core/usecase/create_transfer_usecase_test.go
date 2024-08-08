@@ -53,7 +53,6 @@ func TestCreateTransferUseCase_Execute_Success(t *testing.T) {
 	mockAccountRepo.On("Save", mock.Anything).Return(accountFrom, nil)
 	mockAccountRepo.On("Save", mock.Anything).Return(accountTo, nil)
 
-	// Execute the use case
 	output, err := useCase.Execute(i, accountFrom.Id)
 
 	assert.NoError(t, err)

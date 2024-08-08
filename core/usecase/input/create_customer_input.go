@@ -12,17 +12,18 @@ type CreateCustomerInput struct {
 	Balance   float64 `json:"balance"`
 }
 
-func (i CreateCustomerInput) Validate() error {
+func (i CreateCustomerInput) Validate() []errors.InvalidFieldError {
+	var errs []errors.InvalidFieldError
 	if i.Name == "" {
-		return errors.NewInvalidFieldError("name", "Should not be empty")
+		errs = append(errs, *errors.NewInvalidFieldError("name", "Should not be empty"))
 	}
 	if i.AccountId == "" {
-		return errors.NewInvalidFieldError("account_id", "Should not be empty")
+		errs = append(errs, *errors.NewInvalidFieldError("account_id", "Should not be empty"))
 	}
 	if i.Id == "" {
-		return errors.NewInvalidFieldError("id", "Should not be empty")
+		errs = append(errs, *errors.NewInvalidFieldError("id", "Should not be empty"))
 	}
-	return nil
+	return errs
 }
 
 func (i CreateCustomerInput) ToBytes() ([]byte, error) {

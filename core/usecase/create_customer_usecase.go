@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"transfer-api/core/domain"
+	errors2 "transfer-api/core/errors"
 	"transfer-api/core/repository"
 	"transfer-api/core/usecase/input"
 	"transfer-api/core/usecase/output"
@@ -22,7 +23,7 @@ func NewCreateCustomerUseCase(customerRepo repository.CustomerRepository, accoun
 
 func (c *CreateCustomerUseCase) Execute(input input.CreateCustomerInput) (*output.CreateCustomerOutput, error) {
 	if err := input.Validate(); err != nil {
-		return nil, err
+		return nil, errors2.NewValidationError(err...)
 	}
 
 	user := domain.NewCustomer(input.Id, input.Name, input.AccountId)

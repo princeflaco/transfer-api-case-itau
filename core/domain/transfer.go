@@ -6,7 +6,6 @@ import (
 )
 
 const TimeFormat = "2006-01-02 15:04:05"
-const TransferMaxAmount = 10000.0
 
 type Transfer struct {
 	Id              string

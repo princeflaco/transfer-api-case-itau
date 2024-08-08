@@ -17,21 +17,18 @@ func TestGetAllCustomersUseCase_Execute_Success(t *testing.T) {
 
 	useCase := usecase.NewGetAllCustomersUseCase(mockCustomerRepo, mockAccountRepo)
 
-	// Criando clientes
 	leonardo := domain.NewCustomer(uuid.NewString(), "Leonardo", uuid.NewString())
 	lucas := domain.NewCustomer(uuid.NewString(), "Lucas", uuid.NewString())
 	joao := domain.NewCustomer(uuid.NewString(), "Joao", uuid.NewString())
 
 	customers := []*domain.Customer{leonardo, lucas, joao}
 
-	// Criando contas
 	account1 := domain.NewAccount(leonardo.AccountId, leonardo.Id, 1000)
 	account2 := domain.NewAccount(lucas.AccountId, lucas.Id, 1000)
 	account3 := domain.NewAccount(joao.AccountId, joao.Id, 1000)
 
 	accounts := []*domain.Account{account1, account2, account3}
 
-	// Convertendo saldo e criando saídas esperadas
 	balance1 := util.CentsToFloat64(account1.Balance)
 	output1 := output.NewGetCustomerOutput(leonardo.Id, leonardo.Name, leonardo.AccountId, balance1)
 

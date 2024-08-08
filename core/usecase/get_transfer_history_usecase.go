@@ -1,6 +1,9 @@
 package usecase
 
 import (
+	"sort"
+	"time"
+	"transfer-api/core/domain"
 	"transfer-api/core/repository"
 	"transfer-api/core/usecase/output"
 	"transfer-api/core/util"
@@ -21,11 +24,22 @@ func (uc *GetTransferHistoryUseCase) Execute(accountId string) ([]output.Transfe
 	if err != nil {
 		return []output.TransferHistoryOutput{}, err
 	}
-	var outputs []output.TransferHistoryOutput
-	for _, transfer := range transfers {
+
+	sort.Slice(transfers, func(i, j int) bool {
+		dateI, errI := time.Parse(domain.TimeFormat, transfers[i].Date)
+		dateJ, errJ := time.Parse(domain.TimeFormat, transfers[j].Date)
+
+		if errI != nil || errJ != nil {
+			return false
+		}
+
+		return dateI.After(dateJ)
+	})
+
+	history := make([]output.TransferHistoryOutput, len(transfers))
+	for i, transfer := range transfers {
 		amount := util.CentsToFloat64(transfer.Amount)
-		transferOutput := output.NewTransferHistoryOutput(transfer.Id, transfer.TargetAccountId, amount, transfer.Date, transfer.Success)
-		outputs = append(outputs, *transferOutput)
+		history[i] = *output.NewTransferHistoryOutput(transfer.Id, transfer.TargetAccountId, amount, transfer.Date, transfer.Success)
 	}
-	return outputs, nil
+	return history, nil
 }
