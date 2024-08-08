@@ -5,11 +5,19 @@ import (
 	"transfer-api/core/repository"
 	"transfer-api/core/usecase/input"
 	"transfer-api/core/usecase/output"
+	"transfer-api/core/util"
 )
 
 type CreateCustomerUseCase struct {
 	CustomerRepo repository.CustomerRepository
 	AccountRepo  repository.AccountRepository
+}
+
+func NewCreateCustomerUseCase(customerRepo repository.CustomerRepository, accountRepo repository.AccountRepository) *CreateCustomerUseCase {
+	return &CreateCustomerUseCase{
+		CustomerRepo: customerRepo,
+		AccountRepo:  accountRepo,
+	}
 }
 
 func (c *CreateCustomerUseCase) Execute(input input.CreateCustomerInput) (*output.CreateCustomerOutput, error) {
@@ -25,7 +33,7 @@ func (c *CreateCustomerUseCase) Execute(input input.CreateCustomerInput) (*outpu
 		return nil, err
 	}
 
-	balance := FloatToCents(input.Balance)
+	balance := util.FloatToCents(input.Balance)
 
 	account := domain.NewAccount(input.AccountId, savedUser.Id, balance)
 

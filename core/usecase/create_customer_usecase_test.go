@@ -1,4 +1,4 @@
-package usecase
+package usecase_test
 
 import (
 	"github.com/google/uuid"
@@ -8,17 +8,16 @@ import (
 	"transfer-api/core/domain"
 	"transfer-api/core/errors"
 	"transfer-api/core/repository/mocks"
+	"transfer-api/core/usecase"
 	"transfer-api/core/usecase/input"
+	"transfer-api/core/util"
 )
 
 func TestCreateCustomerUseCase_Success(t *testing.T) {
 	mockCustomerRepo := new(mocks.CustomerRepositoryMock)
 	mockAccountRepo := new(mocks.AccountRepositoryMock)
 
-	useCase := CreateCustomerUseCase{
-		CustomerRepo: mockCustomerRepo,
-		AccountRepo:  mockAccountRepo,
-	}
+	useCase := usecase.NewCreateCustomerUseCase(mockCustomerRepo, mockAccountRepo)
 
 	i := input.CreateCustomerInput{
 		Id:        uuid.NewString(),
@@ -36,7 +35,7 @@ func TestCreateCustomerUseCase_Success(t *testing.T) {
 	expectedAccount := domain.Account{
 		Id:         i.AccountId,
 		CustomerId: i.Id,
-		Balance:    FloatToCents(i.Balance),
+		Balance:    util.FloatToCents(i.Balance),
 	}
 
 	mockCustomerRepo.On("Save", mock.Anything).Return(&expectedCustomer, nil)
@@ -57,10 +56,7 @@ func TestCreateCustomerUseCase_ValidationError(t *testing.T) {
 	mockCustomerRepo := new(mocks.CustomerRepositoryMock)
 	mockAccountRepo := new(mocks.AccountRepositoryMock)
 
-	useCase := CreateCustomerUseCase{
-		CustomerRepo: mockCustomerRepo,
-		AccountRepo:  mockAccountRepo,
-	}
+	useCase := usecase.NewCreateCustomerUseCase(mockCustomerRepo, mockAccountRepo)
 
 	i := input.CreateCustomerInput{
 		Id:        "",
@@ -84,10 +80,7 @@ func TestCreateCustomerUseCase_CustomerRepoError(t *testing.T) {
 	mockCustomerRepo := new(mocks.CustomerRepositoryMock)
 	mockAccountRepo := new(mocks.AccountRepositoryMock)
 
-	useCase := CreateCustomerUseCase{
-		CustomerRepo: mockCustomerRepo,
-		AccountRepo:  mockAccountRepo,
-	}
+	useCase := usecase.NewCreateCustomerUseCase(mockCustomerRepo, mockAccountRepo)
 
 	i := input.CreateCustomerInput{
 		Id:        uuid.NewString(),
@@ -113,10 +106,7 @@ func TestCreateCustomerUseCase_AccountRepoError(t *testing.T) {
 	mockCustomerRepo := new(mocks.CustomerRepositoryMock)
 	mockAccountRepo := new(mocks.AccountRepositoryMock)
 
-	useCase := CreateCustomerUseCase{
-		CustomerRepo: mockCustomerRepo,
-		AccountRepo:  mockAccountRepo,
-	}
+	useCase := usecase.NewCreateCustomerUseCase(mockCustomerRepo, mockAccountRepo)
 
 	i := input.CreateCustomerInput{
 		Id:        uuid.NewString(),

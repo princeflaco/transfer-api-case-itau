@@ -3,6 +3,7 @@ package usecase
 import (
 	"transfer-api/core/repository"
 	"transfer-api/core/usecase/output"
+	"transfer-api/core/util"
 )
 
 type GetTransferHistoryUseCase struct {
@@ -16,13 +17,13 @@ func NewGetTransferHistoryUseCase(transferRepository repository.TransferReposito
 }
 
 func (uc *GetTransferHistoryUseCase) Execute(accountId string) ([]output.TransferHistoryOutput, error) {
-	transfers, err := uc.TransferRepo.GetTransfers(accountId)
+	transfers, err := uc.TransferRepo.GetAll(accountId)
 	if err != nil {
 		return []output.TransferHistoryOutput{}, err
 	}
 	var outputs []output.TransferHistoryOutput
 	for _, transfer := range transfers {
-		amount := CentsToFloat64(transfer.Amount)
+		amount := util.CentsToFloat64(transfer.Amount)
 		transferOutput := output.NewTransferHistoryOutput(transfer.Id, transfer.TargetAccountId, amount, transfer.Date, transfer.Success)
 		outputs = append(outputs, *transferOutput)
 	}

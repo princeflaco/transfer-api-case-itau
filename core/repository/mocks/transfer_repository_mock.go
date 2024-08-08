@@ -9,7 +9,7 @@ type TransferRepositoryMock struct {
 	mock.Mock
 }
 
-func (t *TransferRepositoryMock) GetTransfers(accountId string) ([]*domain.Transfer, error) {
+func (t *TransferRepositoryMock) GetAll(accountId string) ([]*domain.Transfer, error) {
 	r := t.Called(accountId)
 	if r.Get(0) == nil {
 		return nil, r.Error(1)
@@ -17,7 +17,7 @@ func (t *TransferRepositoryMock) GetTransfers(accountId string) ([]*domain.Trans
 	return r.Get(0).([]*domain.Transfer), r.Error(1)
 }
 
-func (t *TransferRepositoryMock) SaveTransfer(transfer domain.Transfer) (*domain.Transfer, error) {
+func (t *TransferRepositoryMock) Save(transfer domain.Transfer) (*domain.Transfer, error) {
 	r := t.Called(transfer)
 	if r.Get(0) == nil {
 		return nil, r.Error(1)

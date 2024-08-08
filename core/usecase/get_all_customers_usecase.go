@@ -3,6 +3,7 @@ package usecase
 import (
 	"transfer-api/core/repository"
 	"transfer-api/core/usecase/output"
+	"transfer-api/core/util"
 )
 
 type GetAllCustomersUseCase struct {
@@ -17,20 +18,20 @@ func NewGetAllCustomersUseCase(customerRepo repository.CustomerRepository, accou
 	}
 }
 
-func (uc *GetAllCustomersUseCase) Execute() ([]output.GetCustomerOutput, error) {
+func (uc *GetAllCustomersUseCase) Execute() ([]*output.GetCustomerOutput, error) {
 	customers, err := uc.CustomerRepo.GetAll()
 	if err != nil {
-		return []output.GetCustomerOutput{}, err
+		return []*output.GetCustomerOutput{}, err
 	}
-	var outputs []output.GetCustomerOutput
+	var outputs []*output.GetCustomerOutput
 	for _, customer := range customers {
 		account, err := uc.AccountRepo.GetById(customer.AccountId)
 		if err != nil {
-			return []output.GetCustomerOutput{}, err
+			continue
 		}
-		balance := CentsToFloat64(account.Balance)
+		balance := util.CentsToFloat64(account.Balance)
 		customerOutput := output.NewGetCustomerOutput(customer.Id, customer.Name, account.Id, balance)
-		outputs = append(outputs, *customerOutput)
+		outputs = append(outputs, customerOutput)
 	}
 	return outputs, nil
 }

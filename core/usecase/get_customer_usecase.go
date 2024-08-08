@@ -3,6 +3,7 @@ package usecase
 import (
 	"transfer-api/core/repository"
 	"transfer-api/core/usecase/output"
+	"transfer-api/core/util"
 )
 
 type GetCustomerUseCase struct {
@@ -26,11 +27,7 @@ func (uc *GetCustomerUseCase) Execute(accountId string) (*output.GetCustomerOutp
 	if err != nil {
 		return nil, err
 	}
-	balance := CentsToFloat64(account.Balance)
+	balance := util.CentsToFloat64(account.Balance)
 	customerOutput := output.NewGetCustomerOutput(customer.Id, customer.Name, account.Id, balance)
 	return customerOutput, nil
-}
-
-func CentsToFloat64(cents int) float64 {
-	return float64(cents) / 100.0
 }
