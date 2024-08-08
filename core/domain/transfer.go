@@ -27,8 +27,6 @@ func NewTransfer(accountId string, targetAccountId string, amount int) *Transfer
 	}
 }
 
-func ()
-
 func (t *Transfer) Successful(successful bool) {
 	t.Success = successful
 }
