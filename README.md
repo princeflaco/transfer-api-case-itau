@@ -2,8 +2,7 @@
 
 [![Go](https://img.shields.io/badge/Go-1.18+-blue.svg)](https://golang.org/)
 [![Gin](https://img.shields.io/badge/Gin-v1.10.0-green.svg)](https://github.com/gin-gonic/gin)
-[![Zap](https://img.shields.io/badge/Zap-v1.19.0-yellow.svg)](https://github.com/uber-go/zap)
-[![Build Status](https://travis-ci.org/princeflaco/transfer-api-case-itau.svg?branch=develop)](https://travis-ci.org/princeflaco/transfer-api-case-itau)
+[![Zap](https://img.shields.io/badge/Zap-v1.27.0-yellow.svg)](https://github.com/uber-go/zap)
 
 ## Descrição
 
