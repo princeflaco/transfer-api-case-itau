@@ -19,7 +19,7 @@ func TestNewTransfer(t *testing.T) {
 	assert.Equal(t, accountId, transfer.AccountId)
 	assert.Equal(t, targetAccountId, transfer.TargetAccountId)
 	assert.Equal(t, amount, transfer.Amount)
-	assert.False(t, transfer.Success)
+	assert.True(t, transfer.Success)
 
 	_, err := uuid.Parse(transfer.Id)
 	assert.NoError(t, err)
@@ -28,16 +28,23 @@ func TestNewTransfer(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestTransfer_Successful(t *testing.T) {
+func TestNewTransfer_NotSuccessful(t *testing.T) {
 	accountId := uuid.NewString()
 	targetAccountId := uuid.NewString()
 	amount := 500
 
 	transfer := domain.NewTransfer(accountId, targetAccountId, amount)
+	transfer.NotSuccessful("test")
 
-	transfer.Successful(true)
-	assert.True(t, transfer.Success)
-
-	transfer.Successful(false)
+	assert.Equal(t, accountId, transfer.AccountId)
+	assert.Equal(t, targetAccountId, transfer.TargetAccountId)
+	assert.Equal(t, amount, transfer.Amount)
 	assert.False(t, transfer.Success)
+	assert.Equal(t, "test", transfer.Reason)
+
+	_, err := uuid.Parse(transfer.Id)
+	assert.NoError(t, err)
+
+	_, err = time.Parse(domain.TimeFormat, transfer.Date)
+	assert.NoError(t, err)
 }

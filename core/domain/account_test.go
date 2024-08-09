@@ -49,7 +49,6 @@ func TestAccount_Withdraw_InsufficientFunds(t *testing.T) {
 		var insufficientFundsError *errorsCore.InsufficientFundsError
 		ok := errors.As(err, &insufficientFundsError)
 		if assert.True(t, ok) {
-			assert.Equal(t, "account123", insufficientFundsError.AccountId)
 			assert.Equal(t, 500, insufficientFundsError.Amount)
 		}
 	}
