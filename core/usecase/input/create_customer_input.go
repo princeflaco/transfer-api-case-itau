@@ -6,9 +6,9 @@ import (
 )
 
 type CreateCustomerInput struct {
-	Id        string  `json:"id"`
-	Name      string  `json:"name"`
-	AccountId string  `json:"account_id"`
+	Id        string  `json:"id" required:"true"`
+	Name      string  `json:"name" required:"true"`
+	AccountId string  `json:"account_id" required:"true"`
 	Balance   float64 `json:"balance"`
 }
 

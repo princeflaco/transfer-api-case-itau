@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"net/http"
 	"strings"
 	"sync"
@@ -42,6 +44,8 @@ func (s *GinServer) ListenAndServe(ctx context.Context, wg *sync.WaitGroup) {
 	s.Engine.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
+
+	s.Engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	server := &http.Server{
 		ReadTimeout:  5 * time.Second,

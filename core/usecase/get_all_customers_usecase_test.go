@@ -5,15 +5,13 @@ import (
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"transfer-api/core/domain"
-	"transfer-api/core/repository/mocks"
 	"transfer-api/core/usecase"
 	"transfer-api/core/usecase/output"
 	"transfer-api/core/util"
 )
 
 func TestGetAllCustomersUseCase_Execute_Success(t *testing.T) {
-	mockCustomerRepo := new(mocks.CustomerRepositoryMock)
-	mockAccountRepo := new(mocks.AccountRepositoryMock)
+	mockCustomerRepo, mockAccountRepo, _, ctx := setupMockDependencies()
 
 	useCase := usecase.NewGetAllCustomersUseCase(mockCustomerRepo, mockAccountRepo)
 
@@ -46,7 +44,7 @@ func TestGetAllCustomersUseCase_Execute_Success(t *testing.T) {
 		mockAccountRepo.On("GetById", account.Id).Return(account, nil)
 	}
 
-	result, err := useCase.Execute()
+	result, err := useCase.Execute(ctx)
 
 	assert.NoError(t, err)
 	assert.Equal(t, expectedOutputs, result)

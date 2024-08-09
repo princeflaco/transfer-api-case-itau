@@ -1,6 +1,7 @@
 package usecase_test
 
 import (
+	"context"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -14,8 +15,7 @@ import (
 )
 
 func TestCreateCustomerUseCase_Success(t *testing.T) {
-	mockCustomerRepo := new(mocks.CustomerRepositoryMock)
-	mockAccountRepo := new(mocks.AccountRepositoryMock)
+	mockCustomerRepo, mockAccountRepo, _, ctx := setupMockDependencies()
 
 	useCase := usecase.NewCreateCustomerUseCase(mockCustomerRepo, mockAccountRepo)
 
@@ -41,7 +41,7 @@ func TestCreateCustomerUseCase_Success(t *testing.T) {
 	mockCustomerRepo.On("Save", mock.Anything).Return(&expectedCustomer, nil)
 	mockAccountRepo.On("Save", mock.Anything).Return(&expectedAccount, nil)
 
-	output, err := useCase.Execute(i)
+	output, err := useCase.Execute(ctx, i)
 
 	if assert.NoError(t, err) {
 		assert.Equal(t, i.Id, output.Id)
@@ -53,8 +53,7 @@ func TestCreateCustomerUseCase_Success(t *testing.T) {
 }
 
 func TestCreateCustomerUseCase_ValidationError(t *testing.T) {
-	mockCustomerRepo := new(mocks.CustomerRepositoryMock)
-	mockAccountRepo := new(mocks.AccountRepositoryMock)
+	mockCustomerRepo, mockAccountRepo, _, ctx := setupMockDependencies()
 
 	useCase := usecase.NewCreateCustomerUseCase(mockCustomerRepo, mockAccountRepo)
 
@@ -71,7 +70,7 @@ func TestCreateCustomerUseCase_ValidationError(t *testing.T) {
 	invalidFieldErr := []errors.InvalidFieldError{*invalidFieldNameErr, *invalidFieldIdErr, *invalidFieldAccountIdErr}
 	validationErr := errors.NewValidationError(invalidFieldErr...)
 
-	output, err := useCase.Execute(i)
+	output, err := useCase.Execute(ctx, i)
 
 	assert.Error(t, err, validationErr)
 	assert.Nil(t, output)
@@ -81,8 +80,7 @@ func TestCreateCustomerUseCase_ValidationError(t *testing.T) {
 }
 
 func TestCreateCustomerUseCase_CustomerRepoError(t *testing.T) {
-	mockCustomerRepo := new(mocks.CustomerRepositoryMock)
-	mockAccountRepo := new(mocks.AccountRepositoryMock)
+	mockCustomerRepo, mockAccountRepo, _, ctx := setupMockDependencies()
 
 	useCase := usecase.NewCreateCustomerUseCase(mockCustomerRepo, mockAccountRepo)
 
@@ -97,7 +95,7 @@ func TestCreateCustomerUseCase_CustomerRepoError(t *testing.T) {
 
 	mockCustomerRepo.On("Save", mock.Anything).Return(nil, duplicatedErr)
 
-	output, err := useCase.Execute(i)
+	output, err := useCase.Execute(ctx, i)
 
 	assert.Error(t, err, duplicatedErr)
 	assert.Nil(t, output)
@@ -107,8 +105,7 @@ func TestCreateCustomerUseCase_CustomerRepoError(t *testing.T) {
 }
 
 func TestCreateCustomerUseCase_AccountRepoError(t *testing.T) {
-	mockCustomerRepo := new(mocks.CustomerRepositoryMock)
-	mockAccountRepo := new(mocks.AccountRepositoryMock)
+	mockCustomerRepo, mockAccountRepo, _, ctx := setupMockDependencies()
 
 	useCase := usecase.NewCreateCustomerUseCase(mockCustomerRepo, mockAccountRepo)
 
@@ -130,11 +127,19 @@ func TestCreateCustomerUseCase_AccountRepoError(t *testing.T) {
 	mockCustomerRepo.On("Save", mock.Anything).Return(&expectedCustomer, nil)
 	mockAccountRepo.On("Save", mock.Anything).Return(nil, duplicatedErr)
 
-	output, err := useCase.Execute(i)
+	output, err := useCase.Execute(ctx, i)
 
 	assert.Error(t, err, duplicatedErr)
 	assert.Nil(t, output)
 
 	mockCustomerRepo.AssertExpectations(t)
 	mockAccountRepo.AssertExpectations(t)
+}
+
+func setupMockDependencies() (*mocks.CustomerRepositoryMock, *mocks.AccountRepositoryMock, *mocks.TransferRepositoryMock, context.Context) {
+	mockCustomerRepo := new(mocks.CustomerRepositoryMock)
+	mockTransferRepo := new(mocks.TransferRepositoryMock)
+	mockAccountRepo := new(mocks.AccountRepositoryMock)
+	testContext := util.NewTestContext()
+	return mockCustomerRepo, mockAccountRepo, mockTransferRepo, testContext
 }

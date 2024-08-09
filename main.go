@@ -2,26 +2,59 @@ package main
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 	"net/http"
+	"strconv"
 	"sync"
 	"time"
 	"transfer-api/adapter/controller"
 	"transfer-api/adapter/repository"
 	repository2 "transfer-api/core/repository"
 	"transfer-api/core/usecase"
+	"transfer-api/docs"
+	"transfer-api/infra"
 	"transfer-api/infra/server"
 )
 
 const (
-	Port     = 8080
-	Timeout  = 30 * time.Second
-	BasePath = "/api/v1"
+	Version  = "v1"
+	BasePath = "/api/" + Version
 )
 
+//	@contact.name	Desenvolvedor
+//	@contact.url	https://github.com/princeflaco
+//	@contact.email	leobbispo@hotmail.com
+
+// @license.name	Apache 2.0
+// @license.url	http://www.apache.org/licenses/LICENSE-2.0.html
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+
+	err := infra.LoadConfig()
+	if err != nil {
+		panic(errors.New("error while initializing config: " + err.Error()))
+	}
+
+	logger := infra.NewLogger(infra.Config.LoggingLevel)
+	defer func(logger *zap.Logger) {
+		err := logger.Sync()
+		if err != nil {
+			panic(fmt.Sprintf("sync logger failed: %v", err))
+		}
+	}(logger)
+
+	ctx = context.WithValue(ctx, "logger", logger)
+
+	docs.SwaggerInfo.Version = Version
+	docs.SwaggerInfo.BasePath = BasePath
+	docs.SwaggerInfo.Schemes = []string{"http"}
+	docs.SwaggerInfo.Host = "localhost:" + infra.Config.Port
+	docs.SwaggerInfo.Title = infra.Config.AppName
+	docs.SwaggerInfo.Description = "Api de transferências"
 
 	var wg sync.WaitGroup
 
@@ -37,7 +70,14 @@ func main() {
 	createTransferHandler := setupCreateTransferHandler(transferRepoImpl, accountRepoImpl)
 	getTransferHistoryHandler := setupGetTransferHistoryHandler(transferRepoImpl)
 
-	ginServer := server.NewGinServer(Port, Timeout).SetBasePath(BasePath)
+	port, err := strconv.Atoi(infra.Config.Port)
+	if err != nil {
+		panic(fmt.Errorf("failed to convert port to int: %v", err))
+	}
+	timeout := time.Duration(infra.Config.Timeout) * time.Second
+	ginServer := server.NewGinServer(int64(port), timeout).SetBasePath(BasePath)
+
+	ginServer.Engine.Use(ContextMiddleware(logger))
 
 	// adicionando rotas
 	ginServer.AddHandler(http.MethodGet, "/transfers/:accountId", getTransferHistoryHandler)
@@ -48,6 +88,14 @@ func main() {
 
 	ginServer.ListenAndServe(ctx, &wg)
 	wg.Wait()
+}
+
+func ContextMiddleware(logger *zap.Logger) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := context.WithValue(c.Request.Context(), "logger", logger)
+		c.Request = c.Request.WithContext(ctx)
+		c.Next()
+	}
 }
 
 func setupCreateCustomerHandler(customerRepo repository2.CustomerRepository, accountRepo repository2.AccountRepository) gin.HandlerFunc {

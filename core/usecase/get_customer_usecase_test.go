@@ -7,14 +7,12 @@ import (
 	"testing"
 	"transfer-api/core/domain"
 	"transfer-api/core/errors"
-	"transfer-api/core/repository/mocks"
 	"transfer-api/core/usecase"
 	"transfer-api/core/util"
 )
 
 func TestGetCustomerUseCase_Success(t *testing.T) {
-	mockCustomerRepo := new(mocks.CustomerRepositoryMock)
-	mockAccountRepo := new(mocks.AccountRepositoryMock)
+	mockCustomerRepo, mockAccountRepo, _, ctx := setupMockDependencies()
 	uc := usecase.NewGetCustomerUseCase(mockCustomerRepo, mockAccountRepo)
 
 	customer := domain.Customer{
@@ -32,7 +30,7 @@ func TestGetCustomerUseCase_Success(t *testing.T) {
 	mockAccountRepo.On("GetById", mock.Anything).Return(&account, nil)
 	mockCustomerRepo.On("GetById", mock.Anything).Return(&customer, nil)
 
-	customerOutput, err := uc.Execute(account.Id)
+	customerOutput, err := uc.Execute(ctx, account.Id)
 
 	assert.NoError(t, err)
 	assert.Equal(t, customer.Id, customerOutput.Id)
@@ -45,8 +43,7 @@ func TestGetCustomerUseCase_Success(t *testing.T) {
 }
 
 func TestGetCustomerUseCase_AccountRepoError(t *testing.T) {
-	mockCustomerRepo := new(mocks.CustomerRepositoryMock)
-	mockAccountRepo := new(mocks.AccountRepositoryMock)
+	mockCustomerRepo, mockAccountRepo, _, ctx := setupMockDependencies()
 	uc := usecase.NewGetCustomerUseCase(mockCustomerRepo, mockAccountRepo)
 
 	accountId := uuid.NewString()
@@ -55,7 +52,7 @@ func TestGetCustomerUseCase_AccountRepoError(t *testing.T) {
 
 	mockAccountRepo.On("GetById", mock.Anything).Return(nil, notFoundErr)
 
-	customerOutput, err := uc.Execute(mock.Anything)
+	customerOutput, err := uc.Execute(ctx, mock.Anything)
 
 	if assert.Error(t, err, notFoundErr) {
 		assert.Nil(t, customerOutput)
@@ -66,8 +63,7 @@ func TestGetCustomerUseCase_AccountRepoError(t *testing.T) {
 }
 
 func TestGetCustomerUseCase_CustomerRepoError(t *testing.T) {
-	mockCustomerRepo := new(mocks.CustomerRepositoryMock)
-	mockAccountRepo := new(mocks.AccountRepositoryMock)
+	mockCustomerRepo, mockAccountRepo, _, ctx := setupMockDependencies()
 	uc := usecase.NewGetCustomerUseCase(mockCustomerRepo, mockAccountRepo)
 
 	account := domain.Account{
@@ -81,7 +77,7 @@ func TestGetCustomerUseCase_CustomerRepoError(t *testing.T) {
 	mockAccountRepo.On("GetById", mock.Anything).Return(&account, nil)
 	mockCustomerRepo.On("GetById", mock.Anything).Return(nil, notFoundErr)
 
-	customerOutput, err := uc.Execute(account.Id)
+	customerOutput, err := uc.Execute(ctx, account.Id)
 
 	if assert.Error(t, err, notFoundErr) {
 		assert.Nil(t, customerOutput)

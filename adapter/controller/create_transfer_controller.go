@@ -1,12 +1,14 @@
 package controller
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
 	"transfer-api/adapter/response"
 	"transfer-api/core/usecase"
 	"transfer-api/core/usecase/input"
+	"transfer-api/core/util"
 )
 
 type CreateTransferController struct {
@@ -17,7 +19,25 @@ func NewCreateTransferController(useCase *usecase.CreateTransferUseCase) *Create
 	return &CreateTransferController{useCase}
 }
 
+// Execute Create Transfer creates a transfer between accounts
+//
+//	@Summary		Transfer amount
+//	@Description	Transfer an amount between accounts
+//	@Tags			Transfer
+//	@Accept			json
+//	@Produce		json
+//	@Param			accountId	path		string				true	"Account ID"
+//	@Param			transfer	body		input.TransferInput	true	"Transfer information"
+//	@Success		201			{object}	output.TransferOutput
+//	@Failure		400			{object}	dto.ErrorDTO
+//	@Failure		404			{object}	dto.ErrorDTO
+//	@Failure		500			{object}	dto.ErrorDTO
+//	@Router			/transfers/{accountId} [post]
 func (uc *CreateTransferController) Execute(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	requestId := util.GetRequestIdFromHeader(r)
+	ctx = context.WithValue(ctx, "request_id", requestId)
+
 	var payload input.TransferInput
 	err := json.NewDecoder(r.Body).Decode(&payload)
 	if err != nil {
@@ -35,7 +55,7 @@ func (uc *CreateTransferController) Execute(w http.ResponseWriter, r *http.Reque
 		}
 	}(r.Body)
 
-	output, err := uc.useCase.Execute(payload, accountId)
+	output, err := uc.useCase.Execute(ctx, payload, accountId)
 	if err != nil {
 		response.BadRequest(w, err)
 		return

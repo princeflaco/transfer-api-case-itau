@@ -42,6 +42,23 @@ definitions:
       name:
         type: string
     type: object
+  output.TransferHistoryOutput:
+    properties:
+      account_id:
+        type: string
+      amount:
+        type: number
+      date:
+        type: string
+      id:
+        type: string
+      reason:
+        type: string
+      success:
+        type: boolean
+      target_account_id:
+        type: string
+    type: object
   output.TransferOutput:
     properties:
       id:
@@ -57,6 +74,7 @@ info:
   contact:
     email: leobbispo@hotmail.com
     name: Desenvolvedor
+    url: https://github.com/princeflaco
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
@@ -137,6 +155,30 @@ paths:
       tags:
       - Customer
   /transfers/{accountId}:
+    get:
+      description: Lists the transfer history in descending order of an account
+      parameters:
+      - description: Account ID
+        in: path
+        name: accountId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/output.TransferHistoryOutput'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorDTO'
+      summary: List the transfer history of an account
+      tags:
+      - Customer
     post:
       consumes:
       - application/json

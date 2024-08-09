@@ -8,15 +8,13 @@ import (
 	"time"
 	"transfer-api/core/domain"
 	errors2 "transfer-api/core/errors"
-	"transfer-api/core/repository/mocks"
 	"transfer-api/core/usecase"
 	"transfer-api/core/usecase/input"
 	"transfer-api/core/util"
 )
 
 func TestCreateTransferUseCase_Execute_Success(t *testing.T) {
-	mockTransferRepo := new(mocks.TransferRepositoryMock)
-	mockAccountRepo := new(mocks.AccountRepositoryMock)
+	_, mockAccountRepo, mockTransferRepo, ctx := setupMockDependencies()
 
 	useCase := usecase.NewCreateTransferUseCase(mockTransferRepo, mockAccountRepo)
 
@@ -50,10 +48,10 @@ func TestCreateTransferUseCase_Execute_Success(t *testing.T) {
 	mockAccountRepo.On("GetById", accountTo.Id).Return(accountTo, nil)
 
 	mockTransferRepo.On("Save", mock.Anything).Return(&expectedTransfer, nil)
-	mockAccountRepo.On("Save", mock.Anything).Return(accountFrom, nil)
-	mockAccountRepo.On("Save", mock.Anything).Return(accountTo, nil)
+	mockAccountRepo.On("Update", mock.Anything).Return(accountFrom, nil)
+	mockAccountRepo.On("Update", mock.Anything).Return(accountTo, nil)
 
-	output, err := useCase.Execute(i, accountFrom.Id)
+	output, err := useCase.Execute(ctx, i, accountFrom.Id)
 
 	assert.NoError(t, err)
 	assert.NotNil(t, output)
@@ -66,8 +64,7 @@ func TestCreateTransferUseCase_Execute_Success(t *testing.T) {
 }
 
 func TestCreateTransferUseCase_Execute_InsufficientFunds(t *testing.T) {
-	mockTransferRepo := new(mocks.TransferRepositoryMock)
-	mockAccountRepo := new(mocks.AccountRepositoryMock)
+	_, mockAccountRepo, mockTransferRepo, ctx := setupMockDependencies()
 
 	useCase := usecase.NewCreateTransferUseCase(mockTransferRepo, mockAccountRepo)
 
@@ -100,7 +97,7 @@ func TestCreateTransferUseCase_Execute_InsufficientFunds(t *testing.T) {
 	mockAccountRepo.On("GetById", accountTo.Id).Return(accountTo, nil)
 	mockTransferRepo.On("Save", mock.Anything).Return(&expectedTransfer, nil)
 
-	output, err := useCase.Execute(i, accountFrom.Id)
+	output, err := useCase.Execute(ctx, i, accountFrom.Id)
 
 	assert.NoError(t, err)
 
@@ -115,8 +112,7 @@ func TestCreateTransferUseCase_Execute_InsufficientFunds(t *testing.T) {
 }
 
 func TestCreateTransferUseCase_Execute_RepoError(t *testing.T) {
-	mockTransferRepo := new(mocks.TransferRepositoryMock)
-	mockAccountRepo := new(mocks.AccountRepositoryMock)
+	_, mockAccountRepo, mockTransferRepo, ctx := setupMockDependencies()
 
 	useCase := usecase.NewCreateTransferUseCase(mockTransferRepo, mockAccountRepo)
 
@@ -141,7 +137,7 @@ func TestCreateTransferUseCase_Execute_RepoError(t *testing.T) {
 
 	mockAccountRepo.On("GetById", accountFrom.Id).Return(nil, notFoundErr)
 
-	output, err := useCase.Execute(i, accountFrom.Id)
+	output, err := useCase.Execute(ctx, i, accountFrom.Id)
 
 	assert.Error(t, err)
 	assert.Nil(t, output)

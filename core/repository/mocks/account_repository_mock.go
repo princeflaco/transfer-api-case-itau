@@ -17,6 +17,14 @@ func (a *AccountRepositoryMock) Save(account domain.Account) (*domain.Account, e
 	return r.Get(0).(*domain.Account), r.Error(1)
 }
 
+func (a *AccountRepositoryMock) Update(account domain.Account) (*domain.Account, error) {
+	r := a.Called(account)
+	if r.Get(0) == nil {
+		return nil, r.Error(1)
+	}
+	return r.Get(0).(*domain.Account), r.Error(1)
+}
+
 func (a *AccountRepositoryMock) GetById(id string) (*domain.Account, error) {
 	r := a.Called(id)
 	if r.Get(0) == nil {

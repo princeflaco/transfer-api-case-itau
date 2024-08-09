@@ -6,14 +6,13 @@ import (
 	"testing"
 	"time"
 	"transfer-api/core/domain"
-	"transfer-api/core/repository/mocks"
 	"transfer-api/core/usecase"
 	"transfer-api/core/usecase/output"
 	"transfer-api/core/util"
 )
 
 func TestGetTransferHistoryUseCase_Success(t *testing.T) {
-	mockTransferRepo := new(mocks.TransferRepositoryMock)
+	_, _, mockTransferRepo, ctx := setupMockDependencies()
 
 	accountId := uuid.NewString()
 	now := time.Now()
@@ -30,9 +29,9 @@ func TestGetTransferHistoryUseCase_Success(t *testing.T) {
 	assert.Len(t, mockTransfers, 3)
 
 	transferHistory := []output.TransferHistoryOutput{
-		{Id: mockTransfers[2].Id, TargetAccountId: mockTransfers[2].TargetAccountId, Amount: util.CentsToFloat64(mockTransfers[2].Amount), Date: mockTransfers[2].Date, Success: mockTransfers[2].Success},
-		{Id: mockTransfers[1].Id, TargetAccountId: mockTransfers[1].TargetAccountId, Amount: util.CentsToFloat64(mockTransfers[1].Amount), Date: mockTransfers[1].Date, Success: mockTransfers[1].Success},
-		{Id: mockTransfers[0].Id, TargetAccountId: mockTransfers[0].TargetAccountId, Amount: util.CentsToFloat64(mockTransfers[0].Amount), Date: mockTransfers[0].Date, Success: mockTransfers[0].Success},
+		{Id: mockTransfers[2].Id, AccountId: accountId, TargetAccountId: mockTransfers[2].TargetAccountId, Amount: util.CentsToFloat64(mockTransfers[2].Amount), Date: mockTransfers[2].Date, Success: mockTransfers[2].Success},
+		{Id: mockTransfers[1].Id, AccountId: accountId, TargetAccountId: mockTransfers[1].TargetAccountId, Amount: util.CentsToFloat64(mockTransfers[1].Amount), Date: mockTransfers[1].Date, Success: mockTransfers[1].Success},
+		{Id: mockTransfers[0].Id, AccountId: accountId, TargetAccountId: mockTransfers[0].TargetAccountId, Amount: util.CentsToFloat64(mockTransfers[0].Amount), Date: mockTransfers[0].Date, Success: mockTransfers[0].Success},
 	}
 
 	assert.Len(t, transferHistory, 3)
@@ -41,7 +40,7 @@ func TestGetTransferHistoryUseCase_Success(t *testing.T) {
 
 	uc := usecase.NewGetTransferHistoryUseCase(mockTransferRepo)
 
-	ucOutput, err := uc.Execute(accountId)
+	ucOutput, err := uc.Execute(ctx, accountId)
 
 	assert.NoError(t, err)
 	assert.Len(t, transferHistory, len(mockTransfers))

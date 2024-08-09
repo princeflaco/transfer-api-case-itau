@@ -1,4 +1,4 @@
-package config
+package infra
 
 import (
 	"fmt"
@@ -6,20 +6,21 @@ import (
 	"runtime/debug"
 )
 
-type config struct {
-	Port    string `envconfig:"PORT" default:"8080"`
-	Timeout int    `envconfig:"TIMEOUT" default:"30"`
-	AppName string `envconfig:"APP_NAME" default:""`
+type Variables struct {
+	Port         string `envconfig:"PORT" default:"8080"`
+	Timeout      int    `envconfig:"TIMEOUT" default:"30"`
+	AppName      string `envconfig:"APP_NAME" default:""`
+	LoggingLevel string `envconfig:"LOGGING_LEVEL" default:"info"`
 }
 
-var Config *config
+var Config *Variables
 
-func NewConfig() error {
+func LoadConfig() error {
 	if Config != nil {
 		return nil
 	}
 
-	cfg := &config{}
+	cfg := &Variables{}
 	err := envconfig.Process("", cfg)
 	if err != nil {
 		return fmt.Errorf("failed to process enviroment variables: %w", err)

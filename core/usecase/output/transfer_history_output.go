@@ -5,7 +5,7 @@ type TransferHistoryOutput struct {
 	AccountId       string  `json:"account_id"`
 	TargetAccountId string  `json:"target_account_id"`
 	Amount          float64 `json:"amount"`
-	Reason          string  `json:"reason,omitempty"`
+	Reason          string  `json:"reason,omitempty" `
 	Date            string  `json:"date"`
 	Success         bool    `json:"success"`
 }

@@ -11,6 +11,7 @@ const docTemplate = `{
         "title": "{{.Title}}",
         "contact": {
             "name": "Desenvolvedor",
+            "url": "https://github.com/princeflaco",
             "email": "leobbispo@hotmail.com"
         },
         "license": {
@@ -137,6 +138,42 @@ const docTemplate = `{
             }
         },
         "/transfers/{accountId}": {
+            "get": {
+                "description": "Lists the transfer history in descending order of an account",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Customer"
+                ],
+                "summary": "List the transfer history of an account",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Account ID",
+                        "name": "accountId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/output.TransferHistoryOutput"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorDTO"
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "Transfer an amount between accounts",
                 "consumes": [
@@ -260,6 +297,32 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "output.TransferHistoryOutput": {
+            "type": "object",
+            "properties": {
+                "account_id": {
+                    "type": "string"
+                },
+                "amount": {
+                    "type": "number"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "reason": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                },
+                "target_account_id": {
                     "type": "string"
                 }
             }
