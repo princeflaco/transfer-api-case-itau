@@ -28,11 +28,9 @@ func (r *InMemTransferRepository) GetAll(accountId string) ([]*domain.Transfer, 
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
-	var transfers []*domain.Transfer
+	transfers := make([]*domain.Transfer, 0, len(r.transfers))
 	for _, transfer := range r.transfers {
-		if transfer.AccountId == accountId {
-			transfers = append(transfers, transfer)
-		}
+		transfers = append(transfers, transfer)
 	}
 
 	return transfers, nil

@@ -16,6 +16,6 @@ func NewTransferMaxAmountError(amount float64) *TransferMaxAmountError {
 }
 
 func (e *TransferMaxAmountError) Error() string {
-	amount := strconv.FormatFloat(e.Amount, 'f', 10, 64)
+	amount := strconv.FormatFloat(e.Amount, 'f', 1, 64)
 	return fmt.Sprintf("Amount of %s exceeds the maximum amount set", amount)
 }

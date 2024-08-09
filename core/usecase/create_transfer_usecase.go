@@ -69,13 +69,13 @@ func (uc *CreateTransferUseCase) Execute(input input.TransferInput, accountId st
 		return nil, err
 	}
 
-	_, err = uc.AccountRepo.Save(*accountFrom)
+	_, err = uc.AccountRepo.Update(*accountFrom)
 
 	if err != nil {
 		return nil, err
 	}
 
-	_, err = uc.AccountRepo.Save(*accountTo)
+	_, err = uc.AccountRepo.Update(*accountTo)
 	if err != nil {
 		return nil, err
 	}
