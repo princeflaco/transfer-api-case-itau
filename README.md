@@ -18,6 +18,10 @@ O projeto é organizado de acordo com a Clean Architecture, que se baseia nos se
 - **Adapters**: Contém a interface para o mundo externo, como controladores HTTP e gateways de dados.
 - **Frameworks & Drivers**: Contém bibliotecas e frameworks específicos de implementação, como o framework Gin para roteamento HTTP e o logger Zap para logging estruturado.
 
+![Clean Architecture](images/clean_architecture.png)
+
+Fonte: https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html
+
 ### Tecnologias Utilizadas
 
 - **Go**: Linguagem de programação para construção de serviços escaláveis e de alto desempenho.
