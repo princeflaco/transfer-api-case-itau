@@ -67,7 +67,7 @@ Antes de executar a aplicação, certifique-se de ter o seguinte software instal
 
 ## Informações
 
-O projeto utiliza variáveis de ambiente para configuração. Você pode definir essas variáveis em seu ambiente ou em um arquivo .env (caso use alguma ferramenta de carregamento de env). As variáveis incluem:
+O projeto utiliza variáveis de ambiente para configuração. As variáveis incluem:
 
 - PORT: porta na qual a aplicação será executada. (padrão é 8080)
 - TIMEOUT: tempo limite para requisições, em segundos. (padrão é 30 segundos)
