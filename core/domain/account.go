@@ -25,7 +25,7 @@ func (a *Account) Deposit(amount int) {
 func (a *Account) Withdraw(amount int) error {
 	if amount > a.Balance {
 		missingAmount := amount - a.Balance
-		return errors.NewInsufficientFundsError(a.Id, missingAmount)
+		return errors.NewInsufficientFundsError(missingAmount)
 	}
 	a.Balance -= amount
 	return nil

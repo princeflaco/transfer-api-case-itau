@@ -34,6 +34,10 @@ func (uc *CreateTransferUseCase) Execute(input input.TransferInput, accountId st
 		return nil, errors2.NewTransferMaxAmountError(input.Amount)
 	}
 
+	if accountId == input.TargetAccountId {
+		return nil, errors2.NewInvalidFieldError("target_account_id", "Cannot transfer to the same account")
+	}
+
 	uc.Lock()
 	defer uc.Unlock()
 
@@ -51,18 +55,16 @@ func (uc *CreateTransferUseCase) Execute(input input.TransferInput, accountId st
 	transfer := domain.NewTransfer(accountTo.Id, accountFrom.Id, amount)
 
 	if err = accountFrom.Withdraw(amount); err != nil {
-		transfer.Successful(false)
+		transfer.NotSuccessful(err.Error())
 		savedTransfer, err := uc.TransferRepo.Save(*transfer)
 		if err != nil {
 			return nil, err
 		}
-		transferOutput := output.NewTransferOutput(savedTransfer.Id, savedTransfer.Success, savedTransfer.Date)
+		transferOutput := output.NewTransferOutput(savedTransfer.Id, savedTransfer.Success, savedTransfer.Date, savedTransfer.Reason)
 		return transferOutput, nil
 	}
 
 	accountTo.Deposit(amount)
-
-	transfer.Successful(true)
 
 	savedTransfer, err := uc.TransferRepo.Save(*transfer)
 	if err != nil {
@@ -80,7 +82,7 @@ func (uc *CreateTransferUseCase) Execute(input input.TransferInput, accountId st
 		return nil, err
 	}
 
-	transferOutput := output.NewTransferOutput(savedTransfer.Id, savedTransfer.Success, savedTransfer.Date)
+	transferOutput := output.NewTransferOutput(savedTransfer.Id, savedTransfer.Success, savedTransfer.Date, "")
 
 	return transferOutput, nil
 }

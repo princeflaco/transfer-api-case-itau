@@ -2,22 +2,21 @@ package errors
 
 import (
 	"fmt"
+	"transfer-api/core/util"
 )
 
 type InsufficientFundsError struct {
-	AccountId string `json:"accountId"`
-	Amount    int    `json:"amount"`
+	Amount int `json:"amount"`
 }
 
 var _ error = (*InsufficientFundsError)(nil)
 
-func NewInsufficientFundsError(accountId string, amount int) *InsufficientFundsError {
+func NewInsufficientFundsError(amount int) *InsufficientFundsError {
 	return &InsufficientFundsError{
-		AccountId: accountId,
-		Amount:    amount,
+		Amount: amount,
 	}
 }
 
 func (err *InsufficientFundsError) Error() string {
-	return fmt.Sprintf("Insufficient funds from: %s, missing amount: %d, ", err.AccountId, err.Amount)
+	return fmt.Sprintf("Insufficient funds, missing amount: %f", util.CentsToFloat64(err.Amount))
 }

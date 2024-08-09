@@ -12,6 +12,7 @@ type Transfer struct {
 	AccountId       string
 	TargetAccountId string
 	Success         bool
+	Reason          string
 	Amount          int
 	Date            string
 }
@@ -21,11 +22,13 @@ func NewTransfer(accountId string, targetAccountId string, amount int) *Transfer
 		AccountId:       accountId,
 		TargetAccountId: targetAccountId,
 		Amount:          amount,
+		Success:         true,
 		Date:            time.Now().Format(TimeFormat),
 		Id:              uuid.NewString(),
 	}
 }
 
-func (t *Transfer) Successful(successful bool) {
-	t.Success = successful
+func (t *Transfer) NotSuccessful(reason string) {
+	t.Success = false
+	t.Reason = reason
 }

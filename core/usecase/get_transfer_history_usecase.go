@@ -39,7 +39,7 @@ func (uc *GetTransferHistoryUseCase) Execute(accountId string) ([]output.Transfe
 	history := make([]output.TransferHistoryOutput, len(transfers))
 	for i, transfer := range transfers {
 		amount := util.CentsToFloat64(transfer.Amount)
-		history[i] = *output.NewTransferHistoryOutput(transfer.Id, transfer.TargetAccountId, amount, transfer.Date, transfer.Success)
+		history[i] = *output.NewTransferHistoryOutput(transfer.Id, transfer.AccountId, transfer.TargetAccountId, amount, transfer.Date, transfer.Success, transfer.Reason)
 	}
 	return history, nil
 }
