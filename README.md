@@ -21,6 +21,10 @@ O projeto é organizado de acordo com a Clean Architecture, que se baseia nos se
 
 Fonte: https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html
 
+### Relação das entidades
+
+![Entity Relation](images/relation_diagram.png)
+
 ### Tecnologias Utilizadas
 
 - **Go**: Linguagem de programação para construção de serviços escaláveis e de alto desempenho.
@@ -73,7 +77,6 @@ Antes de executar a aplicação, certifique-se de ter o seguinte software instal
    ```bash
    docker run -p 8080:8080 transfer-api-case-itau
 
-   Caso a porta tenha sido setado diferente, troque no comando 
 ## Informações
 
 O projeto utiliza variáveis de ambiente para configuração. As variáveis incluem:
