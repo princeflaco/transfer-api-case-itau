@@ -43,12 +43,10 @@ Antes de executar a aplicação, certifique-se de ter o seguinte software instal
    ```bash
    git clone https://github.com/princeflaco/transfer-api-case-itau.git
    cd transfer-api-case-itau
-
 2. Instale as dependências
 
     ```bash
     go mod download
-
 3. (Opcional) Configure as variáveis de ambiente
 
     ```bash
@@ -64,7 +62,19 @@ Antes de executar a aplicação, certifique-se de ter o seguinte software instal
 
     A aplicação estará disponível em http://localhost:8080.
 
+## Execução em Container
 
+1. (Opcional) Configure as variáveis de ambiente: modifique o Dockerfile
+2. Faça o build
+   - Certifique que está no diretório raiz do projeto
+
+   ```bash
+   docker build -t transfer-api-case-itau .
+3. Execute
+   ```bash
+   docker run -p 8080:8080 transfer-api-case-itau
+
+   Caso a porta tenha sido setado diferente, troque no comando 
 ## Informações
 
 O projeto utiliza variáveis de ambiente para configuração. As variáveis incluem:
