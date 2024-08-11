@@ -1,0 +1,220 @@
+definitions:
+  dto.ErrorDTO:
+    properties:
+      detail:
+        type: string
+      timestamp:
+        type: string
+    type: object
+  input.CreateCustomerInput:
+    properties:
+      account_id:
+        type: string
+      balance:
+        type: number
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  input.TransferInput:
+    properties:
+      amount:
+        type: number
+      target_account_id:
+        type: string
+    type: object
+  output.CreateCustomerOutput:
+    properties:
+      account_id:
+        type: string
+      id:
+        type: string
+    type: object
+  output.GetCustomerOutput:
+    properties:
+      account_number:
+        type: string
+      balance:
+        type: number
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  output.TransferHistoryOutput:
+    properties:
+      account_id:
+        type: string
+      amount:
+        type: number
+      date:
+        type: string
+      id:
+        type: string
+      reason:
+        type: string
+      success:
+        type: boolean
+      target_account_id:
+        type: string
+    type: object
+  output.TransferOutput:
+    properties:
+      id:
+        type: string
+      reason:
+        type: string
+      successful:
+        type: boolean
+      timestamp:
+        type: string
+    type: object
+info:
+  contact:
+    email: leobbispo@hotmail.com
+    name: Desenvolvedor
+    url: https://github.com/princeflaco
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+paths:
+  /customers:
+    get:
+      description: List all existent customers
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/output.GetCustomerOutput'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorDTO'
+      summary: List Customers
+      tags:
+      - Customer
+    post:
+      consumes:
+      - application/json
+      description: Creates a customer and an account
+      parameters:
+      - description: Customer and Account information
+        in: body
+        name: customer
+        required: true
+        schema:
+          $ref: '#/definitions/input.CreateCustomerInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/output.CreateCustomerOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorDTO'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorDTO'
+      summary: Create Customer
+      tags:
+      - Customer
+  /customers/{accountId}:
+    get:
+      description: Retrieves a Customer by his account_id
+      parameters:
+      - description: Account ID
+        in: path
+        name: accountId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/output.GetCustomerOutput'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorDTO'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorDTO'
+      summary: Get Customer By Account
+      tags:
+      - Customer
+  /transfers/{accountId}:
+    get:
+      description: Lists the transfer history in descending order of an account
+      parameters:
+      - description: Account ID
+        in: path
+        name: accountId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/output.TransferHistoryOutput'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorDTO'
+      summary: List the transfer history of an account
+      tags:
+      - Customer
+    post:
+      consumes:
+      - application/json
+      description: Transfer an amount between accounts
+      parameters:
+      - description: Account ID
+        in: path
+        name: accountId
+        required: true
+        type: string
+      - description: Transfer information
+        in: body
+        name: transfer
+        required: true
+        schema:
+          $ref: '#/definitions/input.TransferInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/output.TransferOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorDTO'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorDTO'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorDTO'
+      summary: Transfer amount
+      tags:
+      - Transfer
+swagger: "2.0"
