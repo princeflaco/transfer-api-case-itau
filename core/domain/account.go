@@ -30,3 +30,7 @@ func (a *Account) Withdraw(amount int) error {
 	a.Balance -= amount
 	return nil
 }
+
+func (a *Account) GetBalance() int {
+	return a.Balance
+}
