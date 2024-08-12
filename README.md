@@ -75,6 +75,7 @@ A aplicação estará disponível em http://localhost:8080.
    ```bash
    docker build -t transfer-api-case-itau .
 3. Execute
+   - Certifique que a porta externa está livre e a interna está correta.
    ```bash
    docker run -p 8080:8080 transfer-api-case-itau
 
