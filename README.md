@@ -53,6 +53,8 @@ Antes de executar a aplicação, certifique-se de ter o seguinte software instal
 3. (Opcional) Configure as variáveis de ambiente
 
     ```bash
+   export TRANSFER_MAX_AMOUNT=10000
+   export TRANSFER_WORKER_COUNT=5
    export PORT=8080
    export TIMEOUT=30
    export APP_NAME="Transfer API"
@@ -94,6 +96,8 @@ O CreateTransferUseCase utiliza os padrões worker e queue para gerenciar a carg
 
 O projeto utiliza variáveis de ambiente para configuração. As variáveis incluem:
 
+- TRANSFER_WORKER_COUNT: quantidade de workers que será utilizado para execução das transferências. (padrão é 5)
+- TRANSFER_MAX_AMOUNT: valor máximo por transferência. (padrão é 10000)
 - PORT: porta na qual a aplicação será executada. (padrão é 8080)
 - TIMEOUT: tempo limite para requisições, em segundos. (padrão é 30 segundos)
 - APP_NAME: nome da aplicação. (padrão é o nome do modulo, setado em go.mod)
