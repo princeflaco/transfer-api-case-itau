@@ -62,8 +62,7 @@ Antes de executar a aplicação, certifique-se de ter o seguinte software instal
 
     ```bash
     go run main.go
-
-    A aplicação estará disponível em http://localhost:8080.
+A aplicação estará disponível em http://localhost:8080.
 
 ## Execução em Container
 
