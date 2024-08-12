@@ -79,12 +79,28 @@ Antes de executar a aplicação, certifique-se de ter o seguinte software instal
 
 ## Informações
 
+### Gerenciamento de concorrência nas execuções
+
+Este projeto implementa um sistema de transferências com um controle de concorrência utilizando mutex no serviço de transferência e os padrões de design worker e queue no caso de uso.
+
+#### Mutex no Serviço de Transferência
+No TransferServiceImpl, um mutex é usado para garantir que as operações de transferência sejam realizadas de forma isolada. Isso garante que as atualizações de saldo das contas sejam executadas sem condições de corrida, mesmo com múltiplas transferências simultâneas.
+
+#### Padrões Worker e Queue no Caso de Uso
+O CreateTransferUseCase utiliza os padrões worker e queue para gerenciar a carga de trabalho:
+- Queue: As transferências são enfileiradas em um canal para processamento assíncrono.
+- Workers: Um conjunto de goroutines processa as transferências da fila, permitindo o processamento paralelo e eficiente das operações.
+
+### Variáveis de Ambiente
+
 O projeto utiliza variáveis de ambiente para configuração. As variáveis incluem:
 
 - PORT: porta na qual a aplicação será executada. (padrão é 8080)
 - TIMEOUT: tempo limite para requisições, em segundos. (padrão é 30 segundos)
 - APP_NAME: nome da aplicação. (padrão é o nome do modulo, setado em go.mod)
 - LOGGING_LEVEL: nível do Logger. (padrão é INFO)
+
+### API REST
 
 Endpoints Disponíveis:
   - POST /customers: cria um novo cliente e uma conta associada.
@@ -93,12 +109,12 @@ Endpoints Disponíveis:
   - POST /transfers/{accountId}: realiza uma transferência de uma conta para outra.
   - GET /transfers/{accountId}: obtém o histórico de transferências de uma conta.
 
-### Swagger
+#### Swagger
   A documentação da API está disponível via Swagger em:
   - http://localhost:8080/swagger/index.html (após execução do app)
   - Pode ser encontrada em ./docs
 
-### Contribuição
+## Contribuição
 1. Faça um fork do projeto.
 2. Crie uma branch para sua feature (git checkout -b feature/nova-feature).
 3. Faça um commit das suas mudanças (git commit -m 'Adiciona nova feature').
