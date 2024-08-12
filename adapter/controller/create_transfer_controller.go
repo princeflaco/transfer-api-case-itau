@@ -6,8 +6,8 @@ import (
 	"io"
 	"net/http"
 	"transfer-api/adapter/response"
+	"transfer-api/core/service/input"
 	"transfer-api/core/usecase"
-	"transfer-api/core/usecase/input"
 	"transfer-api/core/util"
 )
 

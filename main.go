@@ -13,6 +13,7 @@ import (
 	"transfer-api/adapter/controller"
 	"transfer-api/adapter/repository"
 	repository2 "transfer-api/core/repository"
+	"transfer-api/core/service"
 	"transfer-api/core/usecase"
 	"transfer-api/docs"
 	"transfer-api/infra"
@@ -62,6 +63,8 @@ func main() {
 	customerRepoImpl := repository.NewInMemCustomerRepository()
 	accountRepoImpl := repository.NewInMemAccountRepository()
 	transferRepoImpl := repository.NewInMemTransferRepository()
+
+	// iniciando service
 
 	// criando handlers
 	createCustomerHandler := setupCreateCustomerHandler(customerRepoImpl, accountRepoImpl)
@@ -118,8 +121,10 @@ func setupGetCustomerHandler(customerRepo repository2.CustomerRepository, accoun
 	}
 }
 
-func setupCreateTransferHandler(transferRepo repository2.TransferRepository, accountRepo repository2.AccountRepository) gin.HandlerFunc {
-	uc := usecase.NewCreateTransferUseCase(transferRepo, accountRepo)
+func setupCreateTransferHandler(transferRepository repository2.TransferRepository, accountRepository repository2.AccountRepository) gin.HandlerFunc {
+	svc := service.NewTransferServiceImpl(transferRepository, accountRepository)
+	uc := usecase.NewCreateTransferUseCase(svc)
+	defer uc.Shutdown()
 	cn := controller.NewCreateTransferController(uc)
 	return func(c *gin.Context) {
 		accountId := c.Param("accountId")

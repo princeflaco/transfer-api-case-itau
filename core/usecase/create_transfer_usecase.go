@@ -4,27 +4,71 @@ import (
 	"context"
 	"go.uber.org/zap"
 	"sync"
-	"transfer-api/core/domain"
 	errors2 "transfer-api/core/errors"
-	"transfer-api/core/repository"
-	"transfer-api/core/usecase/input"
-	"transfer-api/core/usecase/output"
+	"transfer-api/core/service"
+	"transfer-api/core/service/input"
+	"transfer-api/core/service/output"
 	"transfer-api/core/util"
 )
 
-type CreateTransferUseCase struct {
-	TransferRepo repository.TransferRepository
-	AccountRepo  repository.AccountRepository
-	sync.Mutex
+type (
+	CreateTransferUseCase struct {
+		Service service.TransferService
+		Queue   chan TransferRequest
+		wg      sync.WaitGroup
+	}
+	TransferRequest struct {
+		Context context.Context
+		Input   input.TransferInput
+		Result  chan TransferResult
+	}
+	TransferResult struct {
+		Output *output.TransferOutput
+		Error  error
+	}
+)
+
+const (
+	TransferMaxAmount = 10000.0
+	WorkerCount       = 10
+)
+
+func NewCreateTransferUseCase(service service.TransferService) *CreateTransferUseCase {
+	useCase := &CreateTransferUseCase{
+		Service: service,
+		Queue:   make(chan TransferRequest, 100),
+	}
+	useCase.startWorkers()
+	return useCase
 }
 
-const TransferMaxAmount = 10000.0
-
-func NewCreateTransferUseCase(transferRepo repository.TransferRepository, accountRepo repository.AccountRepository) *CreateTransferUseCase {
-	return &CreateTransferUseCase{
-		TransferRepo: transferRepo,
-		AccountRepo:  accountRepo,
+func (uc *CreateTransferUseCase) startWorkers() {
+	for i := 0; i < WorkerCount; i++ {
+		uc.wg.Add(1)
+		go uc.transferWorker()
 	}
+}
+
+func (uc *CreateTransferUseCase) transferWorker() {
+	defer uc.wg.Done()
+
+	for req := range uc.Queue {
+		o, err := uc.Service.Execute(req.Context, req.Input)
+		req.Result <- TransferResult{
+			Output: o,
+			Error:  err,
+		}
+		close(req.Result)
+	}
+}
+
+func (uc *CreateTransferUseCase) EnqueueTransfer(ctx context.Context, input input.TransferInput, resultChan chan TransferResult) {
+	uc.Queue <- TransferRequest{Input: input, Context: ctx, Result: resultChan}
+}
+
+func (uc *CreateTransferUseCase) Shutdown() {
+	close(uc.Queue)
+	uc.wg.Wait()
 }
 
 func (uc *CreateTransferUseCase) Execute(ctx context.Context, input input.TransferInput, accountId string) (*output.TransferOutput, error) {
@@ -52,70 +96,14 @@ func (uc *CreateTransferUseCase) Execute(ctx context.Context, input input.Transf
 		return nil, err
 	}
 
-	uc.Lock()
-	defer uc.Unlock()
+	resultChan := make(chan TransferResult)
+	uc.EnqueueTransfer(ctx, input, resultChan)
 
-	accountFrom, err := uc.AccountRepo.GetById(accountId)
-	if err != nil {
-		log.Error("error while retrieving account from database", zap.Error(err))
-		return nil, err
+	result := <-resultChan
+
+	if result.Error != nil {
+		return nil, result.Error
 	}
 
-	log.Debug("retrieved account from database", zap.Any("account", accountFrom))
-
-	accountTo, err := uc.AccountRepo.GetById(input.TargetAccountId)
-	if err != nil {
-		log.Error("error while retrieving target account from database", zap.Error(err))
-		return nil, err
-	}
-
-	log.Debug("retrieved target account from database", zap.Any("target_account", accountTo))
-
-	amount := util.FloatToCents(input.Amount)
-	transfer := domain.NewTransfer(accountTo.Id, accountFrom.Id, amount)
-
-	if err = accountFrom.Withdraw(amount); err != nil {
-		log.Error("error while withdrawing account", zap.Error(err))
-		transfer.NotSuccessful(err.Error())
-		savedTransfer, err := uc.TransferRepo.Save(*transfer)
-		if err != nil {
-			log.Error("error while saving transfer", zap.Error(err))
-			return nil, err
-		}
-		log.Debug("saved transfer", zap.Any("transfer", savedTransfer))
-		transferOutput := output.NewTransferOutput(savedTransfer.Id, savedTransfer.Success, savedTransfer.Date, savedTransfer.Reason)
-		return transferOutput, nil
-	}
-
-	accountTo.Deposit(amount)
-	log.Debug("deposit amount to target account", zap.Any("amount", amount))
-
-	savedTransfer, err := uc.TransferRepo.Save(*transfer)
-	if err != nil {
-		log.Error("error while saving transfer", zap.Error(err))
-		return nil, err
-	}
-
-	log.Debug("saved transfer", zap.Any("transfer", savedTransfer))
-
-	_, err = uc.AccountRepo.Update(*accountFrom)
-
-	if err != nil {
-		log.Error("error while updating account", zap.Error(err))
-		return nil, err
-	}
-
-	log.Debug("updated account", zap.Any("account", accountFrom))
-
-	_, err = uc.AccountRepo.Update(*accountTo)
-	if err != nil {
-		log.Error("error while updating target account", zap.Error(err))
-		return nil, err
-	}
-
-	log.Debug("updated target account", zap.Any("target_account", accountTo))
-
-	transferOutput := output.NewTransferOutput(savedTransfer.Id, savedTransfer.Success, savedTransfer.Date, "")
-
-	return transferOutput, nil
+	return result.Output, nil
 }

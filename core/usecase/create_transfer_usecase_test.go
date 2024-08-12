@@ -8,15 +8,16 @@ import (
 	"time"
 	"transfer-api/core/domain"
 	errors2 "transfer-api/core/errors"
+	"transfer-api/core/service"
+	"transfer-api/core/service/input"
 	"transfer-api/core/usecase"
-	"transfer-api/core/usecase/input"
 	"transfer-api/core/util"
 )
 
 func TestCreateTransferUseCase_Execute_Success(t *testing.T) {
 	_, mockAccountRepo, mockTransferRepo, ctx := setupMockDependencies()
-
-	useCase := usecase.NewCreateTransferUseCase(mockTransferRepo, mockAccountRepo)
+	svc := service.NewTransferServiceImpl(mockTransferRepo, mockAccountRepo)
+	useCase := usecase.NewCreateTransferUseCase(svc)
 
 	accountFrom := &domain.Account{
 		Id:         uuid.NewString(),
@@ -31,6 +32,7 @@ func TestCreateTransferUseCase_Execute_Success(t *testing.T) {
 	}
 
 	i := input.TransferInput{
+		AccountId:       accountFrom.Id,
 		TargetAccountId: accountTo.Id,
 		Amount:          5.0,
 	}
@@ -65,8 +67,8 @@ func TestCreateTransferUseCase_Execute_Success(t *testing.T) {
 
 func TestCreateTransferUseCase_Execute_InsufficientFunds(t *testing.T) {
 	_, mockAccountRepo, mockTransferRepo, ctx := setupMockDependencies()
-
-	useCase := usecase.NewCreateTransferUseCase(mockTransferRepo, mockAccountRepo)
+	svc := service.NewTransferServiceImpl(mockTransferRepo, mockAccountRepo)
+	useCase := usecase.NewCreateTransferUseCase(svc)
 
 	accountFrom := &domain.Account{
 		Id:         uuid.NewString(),
@@ -80,6 +82,7 @@ func TestCreateTransferUseCase_Execute_InsufficientFunds(t *testing.T) {
 	}
 
 	i := input.TransferInput{
+		AccountId:       accountFrom.Id,
 		TargetAccountId: accountTo.Id,
 		Amount:          600.0,
 	}
@@ -113,8 +116,8 @@ func TestCreateTransferUseCase_Execute_InsufficientFunds(t *testing.T) {
 
 func TestCreateTransferUseCase_Execute_RepoError(t *testing.T) {
 	_, mockAccountRepo, mockTransferRepo, ctx := setupMockDependencies()
-
-	useCase := usecase.NewCreateTransferUseCase(mockTransferRepo, mockAccountRepo)
+	svc := service.NewTransferServiceImpl(mockTransferRepo, mockAccountRepo)
+	useCase := usecase.NewCreateTransferUseCase(svc)
 
 	accountFrom := &domain.Account{
 		Id:         uuid.NewString(),
@@ -129,6 +132,7 @@ func TestCreateTransferUseCase_Execute_RepoError(t *testing.T) {
 	}
 
 	i := input.TransferInput{
+		AccountId:       accountFrom.Id,
 		TargetAccountId: accountTo.Id,
 		Amount:          5.0,
 	}

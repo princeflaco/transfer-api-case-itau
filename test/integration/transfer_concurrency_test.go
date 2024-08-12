@@ -7,8 +7,9 @@ import (
 	"testing"
 	"transfer-api/adapter/repository"
 	"transfer-api/core/domain"
+	"transfer-api/core/service"
+	"transfer-api/core/service/input"
 	"transfer-api/core/usecase"
-	"transfer-api/core/usecase/input"
 	"transfer-api/core/util"
 )
 
@@ -25,7 +26,8 @@ func setupInMemRepositories() (*repository.InMemAccountRepository, *repository.I
 
 func TestCreateTransferUseCase_Concurrent_Execute(t *testing.T) {
 	accountRepo, transferRepo := setupInMemRepositories()
-	useCase := usecase.NewCreateTransferUseCase(transferRepo, accountRepo)
+	svc := service.NewTransferServiceImpl(transferRepo, accountRepo)
+	useCase := usecase.NewCreateTransferUseCase(svc)
 
 	accountFromId := uuid.NewString()
 	accountToId := uuid.NewString()
@@ -60,6 +62,7 @@ func TestCreateTransferUseCase_Concurrent_Execute(t *testing.T) {
 
 			ctx := util.NewTestContext()
 			transferInput := input.TransferInput{
+				AccountId:       accountFrom.Id,
 				TargetAccountId: accountToId,
 				Amount:          TransferAmount,
 			}
