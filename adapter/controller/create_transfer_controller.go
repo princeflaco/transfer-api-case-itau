@@ -6,8 +6,8 @@ import (
 	"io"
 	"net/http"
 	"transfer-api/adapter/response"
-	"transfer-api/core/service/input"
 	"transfer-api/core/usecase"
+	"transfer-api/core/usecase/input"
 	"transfer-api/core/util"
 )
 
@@ -27,7 +27,7 @@ func NewCreateTransferController(useCase *usecase.CreateTransferUseCase) *Create
 //	@Accept			json
 //	@Produce		json
 //	@Param			accountId	path		string				true	"Account ID"
-//	@Param			transfer	body		input.TransferInput	true	"Transfer information"
+//	@Param			transfer	body		dto.CreateTransferInput	true	"Transfer information"
 //	@Success		201			{object}	output.TransferOutput
 //	@Failure		400			{object}	dto.ErrorDTO
 //	@Failure		404			{object}	dto.ErrorDTO
@@ -38,7 +38,7 @@ func (uc *CreateTransferController) Execute(w http.ResponseWriter, r *http.Reque
 	requestId := util.GetRequestIdFromHeader(r)
 	ctx = context.WithValue(ctx, "request_id", requestId)
 
-	var payload input.TransferInput
+	var payload input.CreateTransferInput
 	err := json.NewDecoder(r.Body).Decode(&payload)
 	if err != nil {
 		response.BadRequest(w, err)

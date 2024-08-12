@@ -7,10 +7,12 @@ import (
 )
 
 type Variables struct {
-	Port         string `envconfig:"PORT" default:"8080"`
-	Timeout      int    `envconfig:"TIMEOUT" default:"30"`
-	AppName      string `envconfig:"APP_NAME" default:""`
-	LoggingLevel string `envconfig:"LOGGING_LEVEL" default:"info"`
+	TransferMaxAmount   int    `envconfig:"TRANSFER_MAX_AMOUNT" default:"10000"`
+	TransferWorkerCount int    `envconfig:"TRANSFER_WORKER_COUNT" default:"5"`
+	Port                string `envconfig:"PORT" default:"8080"`
+	Timeout             int    `envconfig:"TIMEOUT" default:"30"`
+	AppName             string `envconfig:"APP_NAME" default:""`
+	LoggingLevel        string `envconfig:"LOGGING_LEVEL" default:"info"`
 }
 
 var Config *Variables

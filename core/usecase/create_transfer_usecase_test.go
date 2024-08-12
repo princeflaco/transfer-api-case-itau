@@ -9,15 +9,19 @@ import (
 	"transfer-api/core/domain"
 	errors2 "transfer-api/core/errors"
 	"transfer-api/core/service"
-	"transfer-api/core/service/input"
 	"transfer-api/core/usecase"
+	"transfer-api/core/usecase/input"
 	"transfer-api/core/util"
 )
 
 func TestCreateTransferUseCase_Execute_Success(t *testing.T) {
 	_, mockAccountRepo, mockTransferRepo, ctx := setupMockDependencies()
 	svc := service.NewTransferServiceImpl(mockTransferRepo, mockAccountRepo)
-	useCase := usecase.NewCreateTransferUseCase(svc)
+	config := usecase.TransferConfig{
+		MaxAmount:   10000.0,
+		WorkerCount: 3,
+	}
+	useCase := usecase.NewCreateTransferUseCase(svc, config)
 
 	accountFrom := &domain.Account{
 		Id:         uuid.NewString(),
@@ -31,7 +35,7 @@ func TestCreateTransferUseCase_Execute_Success(t *testing.T) {
 		Balance:    1000,
 	}
 
-	i := input.TransferInput{
+	i := input.CreateTransferInput{
 		AccountId:       accountFrom.Id,
 		TargetAccountId: accountTo.Id,
 		Amount:          5.0,
@@ -68,7 +72,11 @@ func TestCreateTransferUseCase_Execute_Success(t *testing.T) {
 func TestCreateTransferUseCase_Execute_InsufficientFunds(t *testing.T) {
 	_, mockAccountRepo, mockTransferRepo, ctx := setupMockDependencies()
 	svc := service.NewTransferServiceImpl(mockTransferRepo, mockAccountRepo)
-	useCase := usecase.NewCreateTransferUseCase(svc)
+	config := usecase.TransferConfig{
+		MaxAmount:   10000.0,
+		WorkerCount: 3,
+	}
+	useCase := usecase.NewCreateTransferUseCase(svc, config)
 
 	accountFrom := &domain.Account{
 		Id:         uuid.NewString(),
@@ -81,7 +89,7 @@ func TestCreateTransferUseCase_Execute_InsufficientFunds(t *testing.T) {
 		Balance:    1000,
 	}
 
-	i := input.TransferInput{
+	i := input.CreateTransferInput{
 		AccountId:       accountFrom.Id,
 		TargetAccountId: accountTo.Id,
 		Amount:          600.0,
@@ -117,7 +125,11 @@ func TestCreateTransferUseCase_Execute_InsufficientFunds(t *testing.T) {
 func TestCreateTransferUseCase_Execute_RepoError(t *testing.T) {
 	_, mockAccountRepo, mockTransferRepo, ctx := setupMockDependencies()
 	svc := service.NewTransferServiceImpl(mockTransferRepo, mockAccountRepo)
-	useCase := usecase.NewCreateTransferUseCase(svc)
+	config := usecase.TransferConfig{
+		MaxAmount:   10000.0,
+		WorkerCount: 3,
+	}
+	useCase := usecase.NewCreateTransferUseCase(svc, config)
 
 	accountFrom := &domain.Account{
 		Id:         uuid.NewString(),
@@ -131,7 +143,7 @@ func TestCreateTransferUseCase_Execute_RepoError(t *testing.T) {
 		Balance:    1000,
 	}
 
-	i := input.TransferInput{
+	i := input.CreateTransferInput{
 		AccountId:       accountFrom.Id,
 		TargetAccountId: accountTo.Id,
 		Amount:          5.0,

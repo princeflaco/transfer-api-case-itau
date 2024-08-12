@@ -1,14 +1,14 @@
 package output
 
-type TransferOutput struct {
+type CreateTransferOutput struct {
 	Id         string `json:"id"`
 	Successful bool   `json:"successful"`
 	Reason     string `json:"reason,omitempty"`
 	Timestamp  string `json:"timestamp"`
 }
 
-func NewTransferOutput(id string, successful bool, timestamp string, reason string) *TransferOutput {
-	return &TransferOutput{
+func NewCreateTransferOutput(id string, successful bool, timestamp string, reason string) *CreateTransferOutput {
+	return &CreateTransferOutput{
 		Id:         id,
 		Reason:     reason,
 		Successful: successful,

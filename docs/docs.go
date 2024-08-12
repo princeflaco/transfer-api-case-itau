@@ -70,7 +70,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/input.CreateCustomerInput"
+                            "$ref": "#/definitions/dto.CreateCustomerInput"
                         }
                     }
                 ],
@@ -200,7 +200,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/input.TransferInput"
+                            "$ref": "#/definitions/dto.TransferInput"
                         }
                     }
                 ],
@@ -245,7 +245,7 @@ const docTemplate = `{
                 }
             }
         },
-        "input.CreateCustomerInput": {
+        "dto.CreateCustomerInput": {
             "type": "object",
             "properties": {
                 "account_id": {
@@ -262,7 +262,7 @@ const docTemplate = `{
                 }
             }
         },
-        "input.TransferInput": {
+        "dto.TransferInput": {
             "type": "object",
             "properties": {
                 "amount": {

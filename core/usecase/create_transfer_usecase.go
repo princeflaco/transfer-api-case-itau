@@ -6,44 +6,38 @@ import (
 	"sync"
 	errors2 "transfer-api/core/errors"
 	"transfer-api/core/service"
-	"transfer-api/core/service/input"
-	"transfer-api/core/service/output"
+	"transfer-api/core/service/dto"
+	"transfer-api/core/usecase/input"
+	"transfer-api/core/usecase/output"
 	"transfer-api/core/util"
 )
 
-type (
-	CreateTransferUseCase struct {
-		Service service.TransferService
-		Queue   chan TransferRequest
-		wg      sync.WaitGroup
-	}
-	TransferRequest struct {
-		Context context.Context
-		Input   input.TransferInput
-		Result  chan TransferResult
-	}
-	TransferResult struct {
-		Output *output.TransferOutput
-		Error  error
-	}
-)
+type CreateTransferUseCase struct {
+	TransferMaxAmount   float64
+	TransferWorkerCount int
+	Service             service.TransferService
+	Queue               chan dto.TransferRequest
+	wg                  sync.WaitGroup
+}
 
-const (
-	TransferMaxAmount = 10000.0
-	WorkerCount       = 10
-)
+type TransferConfig struct {
+	MaxAmount   float64
+	WorkerCount int
+}
 
-func NewCreateTransferUseCase(service service.TransferService) *CreateTransferUseCase {
+func NewCreateTransferUseCase(service service.TransferService, config TransferConfig) *CreateTransferUseCase {
 	useCase := &CreateTransferUseCase{
-		Service: service,
-		Queue:   make(chan TransferRequest, 100),
+		TransferMaxAmount:   config.MaxAmount,
+		TransferWorkerCount: config.WorkerCount,
+		Service:             service,
+		Queue:               make(chan dto.TransferRequest, 100),
 	}
 	useCase.startWorkers()
 	return useCase
 }
 
 func (uc *CreateTransferUseCase) startWorkers() {
-	for i := 0; i < WorkerCount; i++ {
+	for i := 0; i < uc.TransferWorkerCount; i++ {
 		uc.wg.Add(1)
 		go uc.transferWorker()
 	}
@@ -53,25 +47,12 @@ func (uc *CreateTransferUseCase) transferWorker() {
 	defer uc.wg.Done()
 
 	for req := range uc.Queue {
-		o, err := uc.Service.Execute(req.Context, req.Input)
-		req.Result <- TransferResult{
-			Output: o,
-			Error:  err,
-		}
+		req.Result <- uc.Service.Execute(req)
 		close(req.Result)
 	}
 }
 
-func (uc *CreateTransferUseCase) EnqueueTransfer(ctx context.Context, input input.TransferInput, resultChan chan TransferResult) {
-	uc.Queue <- TransferRequest{Input: input, Context: ctx, Result: resultChan}
-}
-
-func (uc *CreateTransferUseCase) Shutdown() {
-	close(uc.Queue)
-	uc.wg.Wait()
-}
-
-func (uc *CreateTransferUseCase) Execute(ctx context.Context, input input.TransferInput, accountId string) (*output.TransferOutput, error) {
+func (uc *CreateTransferUseCase) Execute(ctx context.Context, input input.CreateTransferInput, accountId string) (*output.CreateTransferOutput, error) {
 	requestId := util.GetRequestIDFromContext(ctx)
 	log := util.GetLoggerFromContext(ctx).With(zap.String("request_id", requestId))
 
@@ -80,11 +61,11 @@ func (uc *CreateTransferUseCase) Execute(ctx context.Context, input input.Transf
 
 	if err := input.Validate(); err != nil {
 		err := errors2.NewValidationError(err...)
-		log.Error("error while validating input", zap.Error(err))
+		log.Error("error while validating dto", zap.Error(err))
 		return nil, err
 	}
 
-	if input.Amount > TransferMaxAmount {
+	if input.Amount > uc.TransferMaxAmount {
 		err := errors2.NewTransferMaxAmountError(input.Amount)
 		log.Error("amount is too high", zap.Error(err))
 		return nil, err
@@ -96,7 +77,7 @@ func (uc *CreateTransferUseCase) Execute(ctx context.Context, input input.Transf
 		return nil, err
 	}
 
-	resultChan := make(chan TransferResult)
+	resultChan := make(chan dto.TransferResult)
 	uc.EnqueueTransfer(ctx, input, resultChan)
 
 	result := <-resultChan
@@ -106,4 +87,13 @@ func (uc *CreateTransferUseCase) Execute(ctx context.Context, input input.Transf
 	}
 
 	return result.Output, nil
+}
+
+func (uc *CreateTransferUseCase) EnqueueTransfer(ctx context.Context, input input.CreateTransferInput, resultChan chan dto.TransferResult) {
+	uc.Queue <- *dto.NewTransferRequest(ctx, input, resultChan)
+}
+
+func (uc *CreateTransferUseCase) Shutdown() {
+	close(uc.Queue)
+	uc.wg.Wait()
 }

@@ -26,7 +26,7 @@ func NewCreateCustomerController(useCase usecase.CreateCustomerUseCase) *CreateC
 //	@Tags			Customer
 //	@Accept			json
 //	@Produce		json
-//	@Param			customer	body		input.CreateCustomerInput	true	"Customer and Account information"
+//	@Param			customer	body		dto.CreateCustomerInput	true	"Customer and Account information"
 //	@Success		201			{object}	output.CreateCustomerOutput
 //	@Failure		400			{object}	dto.ErrorDTO
 //	@Failure		500			{object}	dto.ErrorDTO

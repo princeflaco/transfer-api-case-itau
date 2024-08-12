@@ -32,7 +32,7 @@ func (c *CreateCustomerUseCase) Execute(ctx context.Context, input input.CreateC
 
 	if err := input.Validate(); err != nil {
 		err := errors2.NewValidationError(err...)
-		log.Error("error while validating input", zap.Error(err))
+		log.Error("error while validating dto", zap.Error(err))
 		return nil, err
 	}
 

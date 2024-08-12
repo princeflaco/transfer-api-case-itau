@@ -1,18 +1,17 @@
 package service
 
 import (
-	"context"
 	"go.uber.org/zap"
 	"sync"
 	"transfer-api/core/domain"
 	"transfer-api/core/repository"
-	"transfer-api/core/service/input"
-	"transfer-api/core/service/output"
+	"transfer-api/core/service/dto"
+	"transfer-api/core/usecase/output"
 	"transfer-api/core/util"
 )
 
 type TransferService interface {
-	Execute(ctx context.Context, input input.TransferInput) (*output.TransferOutput, error)
+	Execute(request dto.TransferRequest) dto.TransferResult
 }
 
 type TransferServiceImpl struct {
@@ -28,7 +27,9 @@ func NewTransferServiceImpl(transferRepo repository.TransferRepository, accountR
 	}
 }
 
-func (s *TransferServiceImpl) Execute(ctx context.Context, input input.TransferInput) (*output.TransferOutput, error) {
+func (s *TransferServiceImpl) Execute(request dto.TransferRequest) dto.TransferResult {
+	ctx := request.Context
+	input := request.Input
 	requestId := util.GetRequestIDFromContext(ctx)
 	log := util.GetLoggerFromContext(ctx).With(zap.String("request_id", requestId))
 
@@ -38,7 +39,7 @@ func (s *TransferServiceImpl) Execute(ctx context.Context, input input.TransferI
 	accountFrom, err := s.AccountRepo.GetById(input.AccountId)
 	if err != nil {
 		log.Error("error while retrieving account from database", zap.Error(err))
-		return nil, err
+		return dto.NewTransferResult(nil, err)
 	}
 
 	log.Debug("retrieved account from database", zap.Any("account", accountFrom))
@@ -46,7 +47,7 @@ func (s *TransferServiceImpl) Execute(ctx context.Context, input input.TransferI
 	accountTo, err := s.AccountRepo.GetById(input.TargetAccountId)
 	if err != nil {
 		log.Error("error while retrieving target account from database", zap.Error(err))
-		return nil, err
+		return dto.NewTransferResult(nil, err)
 	}
 
 	log.Debug("retrieved target account from database", zap.Any("target_account", accountTo))
@@ -60,11 +61,11 @@ func (s *TransferServiceImpl) Execute(ctx context.Context, input input.TransferI
 		savedTransfer, err := s.TransferRepo.Save(*transfer)
 		if err != nil {
 			log.Error("error while saving transfer", zap.Error(err))
-			return nil, err
+			return dto.NewTransferResult(nil, err)
 		}
 		log.Debug("saved transfer", zap.Any("transfer", savedTransfer))
-		transferOutput := output.NewTransferOutput(savedTransfer.Id, savedTransfer.Success, savedTransfer.Date, savedTransfer.Reason)
-		return transferOutput, nil
+		transferOutput := output.NewCreateTransferOutput(savedTransfer.Id, savedTransfer.Success, savedTransfer.Date, savedTransfer.Reason)
+		return dto.NewTransferResult(transferOutput, nil)
 	}
 
 	accountTo.Deposit(amount)
@@ -73,7 +74,7 @@ func (s *TransferServiceImpl) Execute(ctx context.Context, input input.TransferI
 	savedTransfer, err := s.TransferRepo.Save(*transfer)
 	if err != nil {
 		log.Error("error while saving transfer", zap.Error(err))
-		return nil, err
+		return dto.NewTransferResult(nil, err)
 	}
 
 	log.Debug("saved transfer", zap.Any("transfer", savedTransfer))
@@ -82,7 +83,7 @@ func (s *TransferServiceImpl) Execute(ctx context.Context, input input.TransferI
 
 	if err != nil {
 		log.Error("error while updating account", zap.Error(err))
-		return nil, err
+		return dto.NewTransferResult(nil, err)
 	}
 
 	log.Debug("updated account", zap.Any("account", accountFrom))
@@ -90,12 +91,12 @@ func (s *TransferServiceImpl) Execute(ctx context.Context, input input.TransferI
 	_, err = s.AccountRepo.Update(*accountTo)
 	if err != nil {
 		log.Error("error while updating target account", zap.Error(err))
-		return nil, err
+		return dto.NewTransferResult(nil, err)
 	}
 
 	log.Debug("updated target account", zap.Any("target_account", accountTo))
 
-	transferOutput := output.NewTransferOutput(savedTransfer.Id, savedTransfer.Success, savedTransfer.Date, "")
+	transferOutput := output.NewCreateTransferOutput(savedTransfer.Id, savedTransfer.Success, savedTransfer.Date, "")
 
-	return transferOutput, nil
+	return dto.NewTransferResult(transferOutput, nil)
 }

@@ -11,8 +11,8 @@ import (
 	"sync"
 	"time"
 	"transfer-api/adapter/controller"
-	"transfer-api/adapter/repository"
-	repository2 "transfer-api/core/repository"
+	repoImpl "transfer-api/adapter/repository"
+	repo "transfer-api/core/repository"
 	"transfer-api/core/service"
 	"transfer-api/core/usecase"
 	"transfer-api/docs"
@@ -32,14 +32,17 @@ const (
 // @license.name	Apache 2.0
 // @license.url	http://www.apache.org/licenses/LICENSE-2.0.html
 func main() {
+	// iniciando contexto
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	// carregando variáveis de ambiente
 	err := infra.LoadConfig()
 	if err != nil {
 		panic(errors.New("error while initializing config: " + err.Error()))
 	}
 
+	// iniciando logger
 	logger := infra.NewLogger(infra.Config.LoggingLevel)
 	defer func(logger *zap.Logger) {
 		err := logger.Sync()
@@ -48,8 +51,10 @@ func main() {
 		}
 	}(logger)
 
+	// adicionando logger ao contexto
 	ctx = context.WithValue(ctx, "logger", logger)
 
+	// configurando valores estáticos do swagger
 	docs.SwaggerInfo.Version = Version
 	docs.SwaggerInfo.BasePath = BasePath
 	docs.SwaggerInfo.Schemes = []string{"http"}
@@ -59,27 +64,38 @@ func main() {
 
 	var wg sync.WaitGroup
 
-	// iniciando repositórios
-	customerRepoImpl := repository.NewInMemCustomerRepository()
-	accountRepoImpl := repository.NewInMemAccountRepository()
-	transferRepoImpl := repository.NewInMemTransferRepository()
-
-	// iniciando service
-
-	// criando handlers
-	createCustomerHandler := setupCreateCustomerHandler(customerRepoImpl, accountRepoImpl)
-	getCustomerHandler := setupGetCustomerHandler(customerRepoImpl, accountRepoImpl)
-	getAllCustomersHandler := setupGetAllCustomersHandler(customerRepoImpl, accountRepoImpl)
-	createTransferHandler := setupCreateTransferHandler(transferRepoImpl, accountRepoImpl)
-	getTransferHistoryHandler := setupGetTransferHistoryHandler(transferRepoImpl)
-
+	// pegando variáveis de porta e timeout da infra
 	port, err := strconv.Atoi(infra.Config.Port)
 	if err != nil {
 		panic(fmt.Errorf("failed to convert port to int: %v", err))
 	}
 	timeout := time.Duration(infra.Config.Timeout) * time.Second
+
+	// criando configurações da transferência
+	transferConfig := usecase.TransferConfig{
+		MaxAmount:   float64(infra.Config.TransferMaxAmount),
+		WorkerCount: infra.Config.TransferWorkerCount,
+	}
+
+	// iniciando repositórios
+	customerRepoImpl := repoImpl.NewInMemCustomerRepository()
+	accountRepoImpl := repoImpl.NewInMemAccountRepository()
+	transferRepoImpl := repoImpl.NewInMemTransferRepository()
+
+	// iniciando serviço
+	transferServiceImpl := service.NewTransferServiceImpl(transferRepoImpl, accountRepoImpl)
+
+	// criando handlers
+	createCustomerHandler := setupCreateCustomerHandler(customerRepoImpl, accountRepoImpl)
+	getCustomerHandler := setupGetCustomerHandler(customerRepoImpl, accountRepoImpl)
+	getAllCustomersHandler := setupGetAllCustomersHandler(customerRepoImpl, accountRepoImpl)
+	createTransferHandler := setupCreateTransferHandler(transferServiceImpl, transferConfig)
+	getTransferHistoryHandler := setupGetTransferHistoryHandler(transferRepoImpl)
+
+	// iniciando servidor
 	ginServer := server.NewGinServer(int64(port), timeout).SetBasePath(BasePath)
 
+	// adicionando middleware para o contexto e request-id
 	ginServer.Engine.Use(ContextMiddleware(logger))
 
 	// adicionando rotas
@@ -89,7 +105,9 @@ func main() {
 	ginServer.AddHandler(http.MethodGet, "/customers/:accountId", getCustomerHandler)
 	ginServer.AddHandler(http.MethodPost, "/customers", createCustomerHandler)
 
+	// escutando requisições
 	ginServer.ListenAndServe(ctx, &wg)
+
 	wg.Wait()
 }
 
@@ -101,7 +119,7 @@ func ContextMiddleware(logger *zap.Logger) gin.HandlerFunc {
 	}
 }
 
-func setupCreateCustomerHandler(customerRepo repository2.CustomerRepository, accountRepo repository2.AccountRepository) gin.HandlerFunc {
+func setupCreateCustomerHandler(customerRepo repo.CustomerRepository, accountRepo repo.AccountRepository) gin.HandlerFunc {
 	uc := usecase.NewCreateCustomerUseCase(customerRepo, accountRepo)
 	cn := controller.NewCreateCustomerController(*uc)
 	return func(c *gin.Context) {
@@ -109,7 +127,7 @@ func setupCreateCustomerHandler(customerRepo repository2.CustomerRepository, acc
 	}
 }
 
-func setupGetCustomerHandler(customerRepo repository2.CustomerRepository, accountRepo repository2.AccountRepository) gin.HandlerFunc {
+func setupGetCustomerHandler(customerRepo repo.CustomerRepository, accountRepo repo.AccountRepository) gin.HandlerFunc {
 	uc := usecase.NewGetCustomerUseCase(customerRepo, accountRepo)
 	cn := controller.NewGetCustomerController(*uc)
 	return func(c *gin.Context) {
@@ -121,9 +139,8 @@ func setupGetCustomerHandler(customerRepo repository2.CustomerRepository, accoun
 	}
 }
 
-func setupCreateTransferHandler(transferRepository repository2.TransferRepository, accountRepository repository2.AccountRepository) gin.HandlerFunc {
-	svc := service.NewTransferServiceImpl(transferRepository, accountRepository)
-	uc := usecase.NewCreateTransferUseCase(svc)
+func setupCreateTransferHandler(transferService service.TransferService, config usecase.TransferConfig) gin.HandlerFunc {
+	uc := usecase.NewCreateTransferUseCase(transferService, config)
 	defer uc.Shutdown()
 	cn := controller.NewCreateTransferController(uc)
 	return func(c *gin.Context) {
@@ -135,7 +152,7 @@ func setupCreateTransferHandler(transferRepository repository2.TransferRepositor
 	}
 }
 
-func setupGetTransferHistoryHandler(transferRepo repository2.TransferRepository) gin.HandlerFunc {
+func setupGetTransferHistoryHandler(transferRepo repo.TransferRepository) gin.HandlerFunc {
 	uc := usecase.NewGetTransferHistoryUseCase(transferRepo)
 	cn := controller.NewGetTransferHistoryController(*uc)
 	return func(c *gin.Context) {
@@ -147,7 +164,7 @@ func setupGetTransferHistoryHandler(transferRepo repository2.TransferRepository)
 	}
 }
 
-func setupGetAllCustomersHandler(customerRepo repository2.CustomerRepository, accountRepo repository2.AccountRepository) gin.HandlerFunc {
+func setupGetAllCustomersHandler(customerRepo repo.CustomerRepository, accountRepo repo.AccountRepository) gin.HandlerFunc {
 	uc := usecase.NewGetAllCustomersUseCase(customerRepo, accountRepo)
 	cn := controller.NewGetAllCustomersController(*uc)
 	return func(c *gin.Context) {

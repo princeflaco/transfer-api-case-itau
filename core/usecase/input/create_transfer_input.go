@@ -2,13 +2,13 @@ package input
 
 import "transfer-api/core/errors"
 
-type TransferInput struct {
+type CreateTransferInput struct {
 	AccountId       string  `json:"account_id" required:"true"`
 	TargetAccountId string  `json:"target_account_id" required:"true"`
 	Amount          float64 `json:"amount" required:"true"`
 }
 
-func (input *TransferInput) Validate() []errors.InvalidFieldError {
+func (input *CreateTransferInput) Validate() []errors.InvalidFieldError {
 	var fieldErrors []errors.InvalidFieldError
 	if input.AccountId == "" {
 		fieldErrors = append(fieldErrors, *errors.NewInvalidFieldError("account_id", "Should not be empty or nil"))
