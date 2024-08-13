@@ -50,6 +50,8 @@ func main() {
 			panic(fmt.Sprintf("sync logger failed: %v", err))
 		}
 	}(logger)
+	logger.Info("logger initialized")
+	logger.Info("config loaded", zap.Any("config", infra.Config))
 
 	// adicionando logger ao contexto
 	ctx = context.WithValue(ctx, "logger", logger)
@@ -69,21 +71,27 @@ func main() {
 	if err != nil {
 		panic(fmt.Errorf("failed to convert port to int: %v", err))
 	}
+	logger.Info("port selected", zap.Int("port", port))
+
 	timeout := time.Duration(infra.Config.Timeout) * time.Second
+	logger.Info("timeout selected", zap.Duration("timeout", timeout))
 
 	// criando configurações da transferência
 	transferConfig := usecase.TransferConfig{
 		MaxAmount:   float64(infra.Config.TransferMaxAmount),
 		WorkerCount: infra.Config.TransferWorkerCount,
 	}
+	logger.Info("transfer config set", zap.Any("config", transferConfig))
 
 	// iniciando repositórios
 	customerRepoImpl := repoImpl.NewInMemCustomerRepository()
 	accountRepoImpl := repoImpl.NewInMemAccountRepository()
 	transferRepoImpl := repoImpl.NewInMemTransferRepository()
+	logger.Info("all repository initialized")
 
 	// iniciando serviço
 	transferServiceImpl := service.NewTransferServiceImpl(transferRepoImpl, accountRepoImpl)
+	logger.Info("all service initialized")
 
 	// criando handlers
 	createCustomerHandler := setupCreateCustomerHandler(customerRepoImpl, accountRepoImpl)
@@ -91,12 +99,15 @@ func main() {
 	getAllCustomersHandler := setupGetAllCustomersHandler(customerRepoImpl, accountRepoImpl)
 	createTransferHandler := setupCreateTransferHandler(transferServiceImpl, transferConfig)
 	getTransferHistoryHandler := setupGetTransferHistoryHandler(transferRepoImpl)
+	logger.Info("all handler initialized")
 
 	// iniciando servidor
 	ginServer := server.NewGinServer(int64(port), timeout).SetBasePath(BasePath)
+	logger.Info("gin server initialized")
 
 	// adicionando middleware para o contexto e request-id
 	ginServer.Engine.Use(ContextMiddleware(logger))
+	logger.Info("gin middleware set")
 
 	// adicionando rotas
 	ginServer.AddHandler(http.MethodGet, "/transfers/:accountId", getTransferHistoryHandler)
@@ -104,9 +115,11 @@ func main() {
 	ginServer.AddHandler(http.MethodGet, "/customers", getAllCustomersHandler)
 	ginServer.AddHandler(http.MethodGet, "/customers/:accountId", getCustomerHandler)
 	ginServer.AddHandler(http.MethodPost, "/customers", createCustomerHandler)
+	logger.Info("gin server handlers set")
 
 	// escutando requisições
 	ginServer.ListenAndServe(ctx, &wg)
+	logger.Info("gin server listening started...")
 
 	wg.Wait()
 }

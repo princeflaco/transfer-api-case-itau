@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"log"
 	"net/http"
 	"strings"
 	"sync"
@@ -35,6 +36,7 @@ func NewGinServer(port int64, timeout time.Duration) *GinServer {
 
 func (s *GinServer) SetBasePath(path string) *GinServer {
 	s.BasePath = path
+	log.Println("base path was set:", s.BasePath)
 	return s
 }
 
@@ -59,11 +61,11 @@ func (s *GinServer) ListenAndServe(ctx context.Context, wg *sync.WaitGroup) {
 	go func() {
 		defer wg.Done()
 		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			panic(err)
+			log.Panicln(err)
 		}
 		<-ctx.Done()
 		if err := server.Shutdown(ctx); err != nil {
-			fmt.Println("Server shutdown:", err)
+			log.Panicln(err)
 		}
 	}()
 }
